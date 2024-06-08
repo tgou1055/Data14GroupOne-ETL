@@ -1,0 +1,9 @@
+## how to run
+* run `npm install`
+* add .env file:
+```
+API_URL=...
+s3_bucket=...
+s3_key=...
+```
+* then `node test.js`
