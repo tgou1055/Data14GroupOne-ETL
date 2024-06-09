@@ -69,6 +69,7 @@ GROUP BY product_id
 ORDER BY product_id ASC;
 
 -- version 08/06/2024
+-- v.2
 
 
 
