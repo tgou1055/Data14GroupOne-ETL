@@ -48,7 +48,7 @@ LIMIT 50;
 
 CREATE VIEW product_with_Sequence_number AS
 SELECT user_id,order_number, op.product_id, product_name,reordered,
-       ROW_NUMBER() OVER (PARTITION BY user_id,p.product_id ORDER BY user_id) AS sequence_number
+       ROW_NUMBER() OVER (PARTITION BY user_id,p.product_id ORDER BY user_number) AS sequence_number
 FROM order_products_prior op
 JOIN products p 
 ON op.product_id = p.product_id
@@ -60,7 +60,7 @@ ORDER BY user_id;
 -- each product, calculate the count, sum of reordered.count of product_seq_time = 1 and count of product_seq_time = 2.
 
 SELECT product_id,
-       COUNT(reordered) AS reordered_count,
+       COUNT(*) AS reordered_count,
        SUM(reordered) AS reordered_SUM,
        SUM(CASE WHEN sequence_number = 1 THEN 1 ELSE 0 END) AS sequence_number_1_count,
        SUM(CASE WHEN sequence_number = 2 THEN 1 ELSE 0 END) AS sequence_number_2_count
