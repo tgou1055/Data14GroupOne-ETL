@@ -30,14 +30,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.SAM_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ github.event.inputs.region }}
 
+      - name: Deploy S3
+        id: deploy-s3
+        uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
+        with:
+          name:  deploy-s3
+          template: cfn/s3.yml
+          parameter-overrides: BucketName=${{ github.event.inputs.bucketName }}
+
       - name: Upload Spark code to S3
         run: aws s3 cp ETL/Sam/ETL-job.py s3://${{ github.event.inputs.bucketName }}/glueJobCodes/ETL-job.py
 
-      - name: Deploy CloudFormation Stacks
-        id: deploy-cloudformation
+      - name: Deploy Glue Job
+        id: deploy-glue
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3
         with:
-          name:  deploy-cloudformation
-          template: cfn/lakeformation.yml
+          name:  deploy-glue
+          template: cfn/glueJob.yml
           parameter-overrides: BucketName=${{ github.event.inputs.bucketName }}
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
