@@ -27,7 +27,7 @@ Resources:
       Role: !GetAtt GlueJobRole.Arn
       Command:
         Name: glueetl
-        ScriptLocation: !Sub s3://${BucketName}/glueJobCodes/etl.py
+        ScriptLocation: !Sub s3://${BucketName}/glueJobCodes/ETL-job.py
         PythonVersion: '3'
       DefaultArguments:
         '--TempDir': !Sub s3://${BucketName}/glueJobTemp/
