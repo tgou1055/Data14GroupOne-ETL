@@ -40,3 +40,4 @@ jobs:
           name:  deploy-cloudformation
           template: cfn/lakeformation.yml
           parameter-overrides: BucketName=${{ github.event.inputs.bucketName }}
+          capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
