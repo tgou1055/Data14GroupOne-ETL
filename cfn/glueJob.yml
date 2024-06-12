@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  BucketName:
+    Type: String
+    Description: Name of the S3 bucket
+
+Resources:
+  GlueJobRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: GlueJobRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+  GlueJob:
+    Type: 'AWS::Glue::Job'
+    Properties:
+      Name: MyGlueJob
+      Role: !GetAtt GlueJobRole.Arn
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub s3://${BucketName}/glueJobCodes/ETL-job.py
+        PythonVersion: '3'
+      DefaultArguments:
+        '--TempDir': !Sub s3://${BucketName}/glueJobTemp/
+        '--job-bookmark-option': 'job-bookmark-enable'
+      GlueVersion: '4.0'
+      MaxCapacity: 2.0
+
+Outputs:
+  GlueJobName:
+    Description: Name of the Glue Job
+    Value: !Ref GlueJob
