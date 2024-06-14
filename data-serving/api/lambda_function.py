@@ -1,33 +1,30 @@
 import json
 import boto3
+import os
 
-s3 = boto3.client('s3')
+runtime = boto3.client('runtime.sagemaker')
 
 def lambda_handler(event, context):
-    s3_bucket = event['s3_bucket']
-    s3_key = event['s3_key']
-    if not s3_bucket or not s3_key:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({
-                'message': 's3_bucket and s3_key are required'
-            })
-        }
+    input_data = event['data']
 
     try:
-        # Get the object from S3
-        s3_response = s3.get_object(Bucket=s3_bucket, Key=s3_key)
-        file_content = s3_response['Body'].read().decode('utf-8')
-        
+        response = runtime.invoke_endpoint(
+            EndpointName=os.environ['ENDPOINT_NAME'],
+            ContentType='text/csv',
+            Body=input_data
+        )
+        result = int(float(response['Body'].read().decode('ascii')))
         return {
             'statusCode': 200,
-            'body': file_content
+            'body': json.dumps({
+                'prediction': result
+            })
         }
     except Exception as e:
         return {
             'statusCode': 500,
             'body': json.dumps({
-                'message': 'Error reading file from S3',
+                'message': 'Error getting prediction from sagemaker',
                 'error': str(e)
             })
         }
