@@ -87,12 +87,6 @@ Sam"""
             }
         )
         
-        return {
-            'statusCode': 200,
-            'body': json.dumps('User created and email sent successfully!')
-        }
+        print('User created and email sent successfully!')
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps(str(e))
-        }
+        print(e)
