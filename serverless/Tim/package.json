@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-glue": "^2.12.1",
+    "serverless-prune-plugin": "^2.0.2",
+    "serverless-python-requirements": "^6.1.0"
+  }
+}

@@ -1,0 +1,197 @@
+service: ${env:APPLICATION}
+frameworkVersion: '4'
+
+useDotenv: true
+variablesResolutionMode: 20210326
+
+plugins:
+  - serverless-python-requirements
+  - serverless-dotenv-plugin
+  - serverless-prune-plugin
+  - serverless-glue
+custom:
+  pythonRequirements:
+    dockerizePip: false
+  # prune:
+  #   automatic: true
+  #   number: 3
+  dotenv:
+    include:
+      - TZ_LOCAL
+
+provider:
+  name: aws
+  runtime: ${env:PYTHON_VERSION}
+  memorySize: 256
+  timeout: 300
+  deploymentBucket:
+    name: ${env:DEPLOYMENT_BUCKET}
+    maxPreviousDeploymentArtifacts: 3
+  region: ${env:REGION}
+  versionFunctions: true
+  profile: default
+
+# you can add statements to the Lambda function's IAM Role here
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - glue:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - logs:*
+      Resource: "*"
+    
+
+# you can define service wide environment variables here
+  environment:
+
+# you can add packaging information here
+package:
+  exclude:
+    - __cache__/**
+    - __pycache__/**
+    - node_modules/**
+    - 'package.json'
+    - 'package-lock.json'
+
+functions:
+  dataPipeline:
+    handler: data_pipeline.lambda_handler
+    name: imba_data_pipeline
+    description: "ETL of InstaCart"
+    events:
+      - s3:
+          bucket: ${env:EVENT_BUCKET}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: data_csv/
+  
+  helloapi:
+    handler: helloapi.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+
+#Glue Jobs:
+Glue:
+  bucketDeploy: ${env:s3_bucket}
+  jobs:
+    - name: ${env:job_name}
+      scriptPath: ${env:glue_script_python_file_name} #modify this
+      type: spark
+      glueVersion: python3-4.0
+      role: ${env:glue_iam}
+      MaxConcurrentRuns: 2
+      WorkerType: Standard
+      NumberOfWorkers: 1
+      Timeout: 5
+      MaxRetries: 1
+      SupportFiles:
+        - local_path: ${env:local_path}
+          s3_bucket: ${env:s3_bucket}
+          s3_prefix: ${env:s3_prefix_glue_script}
+          execute_upload: True
+      # check DPU capacity : 2 
+
+# Add CloudFormation resource templates here
+resources:
+  
+  Description: InstaCart Table Creation, Data Injection, Transformation and Sinking
+  
+  Parameters:
+    ImbaDatabaseNameCsv:
+      Type: String
+      Default: cfn_imba_database_csv
+    ImbaDatabaseNameParquet:
+      Type: String
+      Default: cfn_imba_database_parquet
+    ImbaAislesTableName:
+      Type: String
+      Default: aisles
+    ImbaAislesDataLocationCsv:
+      Type: String
+      Default: s3://tgou1055-imba-sls-deployment/data_csv/aisles/
+    ImbaAislesDataLocationParquet:
+      Type: String
+      Default: s3://tgou1055-imba-sls-event/data_parquet/aisles/
+
+  Resources:
+    # glue database for csv files
+    ImbaDatabaseCsv:
+      Type: AWS::Glue::Database
+      Properties:
+        CatalogId: !Ref AWS::AccountId
+        DatabaseInput:
+          Name: !Ref ImbaDatabaseNameCsv
+          Description: "Glue database for imba project"
+
+    AislesTableCsv:
+      DependsOn: ImbaDatabaseCsv
+      Type: AWS::Glue::Table
+      Properties:
+        CatalogId: !Ref AWS::AccountId
+        DatabaseName: !Ref ImbaDatabaseNameCsv
+        TableInput:
+          Name: !Ref ImbaAislesTableName
+          Description: "Table containing aisle data in CSV format"
+          TableType: EXTERNAL_TABLE
+          StorageDescriptor:
+            OutputFormat: org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+            Columns:
+            - Name: aisle_id
+              Type: bigint
+            - Name: aisle
+              Type: string
+            InputFormat: org.apache.hadoop.mapred.TextInputFormat
+            Location: !Ref ImbaAislesDataLocationCsv
+            SerdeInfo:
+              Parameters:
+                field.delim: ","
+                skip.header.line.count: "1"
+              SerializationLibrary: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe
+
+    # glue database for parquet files
+    ImbaDatabaseParquet:
+      Type: AWS::Glue::Database
+      Properties:
+        CatalogId: !Ref AWS::AccountId
+        DatabaseInput:
+          Name: !Ref ImbaDatabaseNameParquet
+          Description: "Glue database for imba project"
+
+    
+    AislesTableParquet:
+      DependsOn: ImbaDatabaseParquet
+      Type: AWS::Glue::Table
+      Properties:
+        CatalogId: !Ref AWS::AccountId
+        DatabaseName: !Ref ImbaDatabaseParquet
+        TableInput:
+          Name: !Ref ImbaAislesTableName
+          Description: "Glue table for Parquet data"
+          TableType: "EXTERNAL_TABLE"
+          Parameters:
+            classification: "parquet"
+            EXTERNAL: "TRUE"
+          StorageDescriptor:
+            Columns:
+              - Name: aisle_id
+                Type: bigint
+              - Name: aisle
+                Type: string
+            Location: !Ref ImbaAislesDataLocationParquet
+            InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+            OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+            Compressed: false
+            NumberOfBuckets: -1
+            SerdeInfo:
+              SerializationLibrary: "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+              Parameters:
+                serialization.format: "1"
+            StoredAsSubDirectories: false
