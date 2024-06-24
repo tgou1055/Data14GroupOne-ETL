@@ -1,5 +1,6 @@
 .ipynb_checkpoints
 .env
 .DS_Store
+.idea
 node_modules
 iris_data
