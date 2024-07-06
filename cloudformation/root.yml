@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  scriptsBucket:
+    Type: String
+    Description: S3 bucket name where scripts will be uploaded
+
+Resources:
+  GlueJobStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueJob.yml"
+      Parameters:
+        scriptsBucket: !Ref scriptsBucket
+
+  LambdaStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/lambda.yml"
+      Parameters:
+        scriptsBucket: !Ref scriptsBucket
+
+  StepFunctionStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
+      Parameters:
+        scriptsBucket: !Ref scriptsBucket
+
+  GlueCatalogStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueCatalog.yml"
