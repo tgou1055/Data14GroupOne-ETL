@@ -8,7 +8,7 @@ Resources:
   GlueJobStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
-      TemplateURL: "https://${scriptsBucket}.s3.amazonaws.com//cloudformation/glueJob.yml"
+      TemplateURL: "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueJob.yml"
       Parameters:
         scriptsBucket: !Ref scriptsBucket
 
