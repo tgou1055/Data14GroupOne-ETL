@@ -2,7 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Parameters:
   scriptsBucket:
     Type: String
-    Description: S3 bucket name where scripts will be uploaded
+  rawBucket:
+    Type: String
+  transformedBucket:
+    Type: String
 
 Resources:
   GlueJobStack:
@@ -18,7 +21,9 @@ Resources:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/lambda.yml"
       Parameters:
         scriptsBucket: !Ref scriptsBucket
-        
+        rawBucket: !Ref rawBucket
+        transformedBucket: !Ref transformedBucket
+
   # GlueCatalogStack:
   #   Type: 'AWS::CloudFormation::Stack'
   #   Properties:

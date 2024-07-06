@@ -45,6 +45,6 @@ jobs:
         with:
           name: deploy-stack
           template: cloudformation/root.yml
-          parameter-overrides: scriptsBucket=${{ github.event.inputs.scriptsBucket }}
+          parameter-overrides: "scriptsBucket=${{ github.event.inputs.scriptsBucket }},rawBucket=${{ github.event.inputs.rawBucket }},transformedBucket=${{ github.event.inputs.transformedBucket }}"
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"
