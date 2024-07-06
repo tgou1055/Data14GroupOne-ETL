@@ -12,12 +12,17 @@ Resources:
       Parameters:
         scriptsBucket: !Ref scriptsBucket
 
-  # LambdaStack:
+  LambdaStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/lambda.yml"
+      Parameters:
+        scriptsBucket: !Ref scriptsBucket
+        
+  # GlueCatalogStack:
   #   Type: 'AWS::CloudFormation::Stack'
   #   Properties:
-  #     TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/lambda.yml"
-  #     Parameters:
-  #       scriptsBucket: !Ref scriptsBucket
+  #     TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueCatalog.yml"
 
   # StepFunctionStack:
   #   Type: 'AWS::CloudFormation::Stack'
@@ -26,7 +31,4 @@ Resources:
   #     Parameters:
   #       scriptsBucket: !Ref scriptsBucket
 
-  # GlueCatalogStack:
-  #   Type: 'AWS::CloudFormation::Stack'
-  #   Properties:
-  #     TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueCatalog.yml"
+
