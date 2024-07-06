@@ -31,3 +31,7 @@ Resources:
         S3Key: lambda/raw2staging.zip
       Runtime: python3.12
       Timeout: 60
+      Environment: 
+        Variables: 
+          SOURCE_BUCKET: !Ref rawBucket
+          DESTINATION_BUCKET: !Ref transformedBucket

@@ -10,7 +10,15 @@ on:
       scriptsBucket:
         description: "S3 bucket name where scripts will be uploaded"
         required: true
-        default: "data14group1-scripts"
+        default: data14group1-scripts
+      rawBucket:
+        description: "S3 bucket name where raw data is stored"
+        required: true
+        default: data14group1-raw
+      transformedBucket:
+        description: "S3 bucket name where transformed data after ETL is stored"
+        required: true
+        default: data14group1-transformed
 
 jobs:
   cfn-deployment:
