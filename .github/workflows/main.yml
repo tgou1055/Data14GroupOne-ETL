@@ -28,7 +28,7 @@ jobs:
           aws-region: ${{ github.event.inputs.region }}
 
       - name: Run upload script
-        run: sh ./upload_to_s3.sh ${{ github.event.inputs.scriptsBucket }}
+        run: sh scripts/upload_to_s3.sh ${{ github.event.inputs.scriptsBucket }}
 
 
       # - name: Deploy CloudFormation Stack
