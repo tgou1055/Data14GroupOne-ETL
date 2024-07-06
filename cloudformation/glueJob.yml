@@ -33,4 +33,4 @@ Resources:
         '--job-bookmark-option': 'job-bookmark-enable'
       GlueVersion: '4.0'
       MaxCapacity: 2.0
-      TIMEOUT: 15
+      Timeout: 15
