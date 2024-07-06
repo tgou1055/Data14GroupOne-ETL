@@ -20,17 +20,17 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
 
-  GlueJobProductsDenorm:
-    Type: 'AWS::Glue::Job'
-    Properties:
-      Name: GlueJobProductsDenorm
-      Role: !GetAtt GlueJobRole.Arn
-      Command:
-        Name: glueetl
-        ScriptLocation: !Sub s3://${scriptsBucket}/gluejob/products_denorm.py
-        PythonVersion: '3'
-      DefaultArguments:
-        '--job-bookmark-option': 'job-bookmark-enable'
-      GlueVersion: '4.0'
-      MaxCapacity: 2.0
-      TIMEOUT: 15
+  # GlueJobProductsDenorm:
+  #   Type: 'AWS::Glue::Job'
+  #   Properties:
+  #     Name: GlueJobProductsDenorm
+  #     Role: !GetAtt GlueJobRole.Arn
+  #     Command:
+  #       Name: glueetl
+  #       ScriptLocation: !Sub s3://${scriptsBucket}/gluejob/products_denorm.py
+  #       PythonVersion: '3'
+  #     DefaultArguments:
+  #       '--job-bookmark-option': 'job-bookmark-enable'
+  #     GlueVersion: '4.0'
+  #     MaxCapacity: 2.0
+  #     TIMEOUT: 15
