@@ -28,6 +28,6 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         S3Bucket: !Ref scriptsBucket
-        S3Key: lambda/raw2staging.py
+        S3Key: lambda/raw2staging.zip
       Runtime: python3.12
       Timeout: 60
