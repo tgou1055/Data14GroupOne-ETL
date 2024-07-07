@@ -29,6 +29,9 @@ update_lambda() {
   echo "$varName=$version_id" >> $GITHUB_ENV
 }
 
+# Upload CloudFormation templates to S3
+echo "Uploading CloudFormation templates to S3..."
+aws s3 sync cloudformation/ s3://${SCRIPTS_BUCKET}/cloudformation/
 
 # upload gluejob scripts
 aws s3 sync scripts/gluejob/ s3://${SCRIPTS_BUCKET}/gluejob/
@@ -40,10 +43,6 @@ update_lambda raw2staging.py LAMBDA_RAW2STAGING_VERSION
 # Upload Step Function definition to S3
 #echo "Uploading Step Function definition to S3..."
 #aws s3 cp statemachines/dataLakePipeline.json s3://${SCRIPTS_BUCKET}/statemachines/dataLakePipeline.json
-
-# Upload CloudFormation templates to S3
-#echo "Uploading CloudFormation templates to S3..."
-#aws s3 sync cloudformation/ s3://${SCRIPTS_BUCKET}/cloudformation/
 
 echo "All files uploaded successfully."
 
