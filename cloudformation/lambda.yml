@@ -41,3 +41,5 @@ Resources:
         Variables: 
           SOURCE_BUCKET: !Ref rawBucket
           DESTINATION_BUCKET: !Ref stagingBucket
+      EphemeralStorage:
+        Size: 1024
