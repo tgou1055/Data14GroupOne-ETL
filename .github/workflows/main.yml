@@ -36,7 +36,7 @@ jobs:
           aws-region: ${{ github.event.inputs.region }}
 
       - name: Run upload script
-        run: sh scripts/upload_to_s3.sh ${{ github.event.inputs.scriptsBucket }}
+        run: sh scripts/shell/upload_to_s3.sh ${{ github.event.inputs.scriptsBucket }}
 
 
       - name: Deploy CloudFormation Stack
@@ -48,7 +48,7 @@ jobs:
           parameter-overrides: |
             scriptsBucket=${{ github.event.inputs.scriptsBucket }},
             rawBucket=${{ github.event.inputs.rawBucket }},
-            stagingBucket=${{ github.event.inputs.stagingBucket }}
-#            lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }}
+            stagingBucket=${{ github.event.inputs.stagingBucket }},
+            lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }}
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"
