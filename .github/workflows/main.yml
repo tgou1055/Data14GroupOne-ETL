@@ -16,7 +16,7 @@ on:
         required: true
         default: data14group1-raw
       stagingBucket:
-        description: "S3 bucket name where raw data is stored"
+        description: "S3 bucket name where staging data is stored"
         required: true
         default: data14group1-staging
 

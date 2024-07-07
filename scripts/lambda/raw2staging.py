@@ -2,7 +2,7 @@ import boto3
 import os
 
 s3 = boto3.client('s3')
-# hello world123
+# hello world
 def lambda_handler(event, context):
     source_bucket = os.environ['SOURCE_BUCKET']
     destination_bucket = os.environ['DESTINATION_BUCKET']
