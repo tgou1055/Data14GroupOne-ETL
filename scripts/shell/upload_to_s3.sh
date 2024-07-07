@@ -45,5 +45,4 @@ update_lambda raw2staging.py LAMBDA_RAW2STAGING_VERSION
 #aws s3 cp statemachines/dataLakePipeline.json s3://${SCRIPTS_BUCKET}/statemachines/dataLakePipeline.json
 
 echo "All files uploaded successfully."
-#
 
