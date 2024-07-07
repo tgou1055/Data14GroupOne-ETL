@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  scriptsBucket:
+    Type: String
+  rawBucket:
+    Type: String
+  stagingBucket:
+    Type: String
+  lambdaRaw2stagingVersion:
+    Type: String
+
+Resources:
+  GlueJobStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueJob.yml"
+      Parameters:
+        scriptsBucket: !Ref scriptsBucket
+
+  LambdaStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/lambda.yml"
+      Parameters:
+        scriptsBucket: !Ref scriptsBucket
+        rawBucket: !Ref rawBucket
+        stagingBucket: !Ref stagingBucket
+        lambdaRaw2stagingVersion: !Ref lambdaRaw2stagingVersion
+
+  # GlueCatalogStack:
+  #   Type: 'AWS::CloudFormation::Stack'
+  #   Properties:
+  #     TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueCatalog.yml"
+
+  # StepFunctionStack:
+  #   Type: 'AWS::CloudFormation::Stack'
+  #   Properties:
+  #     TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
+  #     Parameters:
+  #       scriptsBucket: !Ref scriptsBucket
+
+

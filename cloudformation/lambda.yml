@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  scriptsBucket:
+    Type: String
+  rawBucket:
+    Type: String
+  stagingBucket:
+    Type: String
+  lambdaRaw2stagingVersion:
+    Type: String
+
+Resources:
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+  LambdaRaw2Staging:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: CopyFilesLambda
+      Handler: raw2staging.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref scriptsBucket
+        S3Key: lambda/raw2staging.zip
+        S3ObjectVersion: !Ref lambdaRaw2stagingVersion
+      Runtime: python3.12
+      Timeout: 60
+      Environment: 
+        Variables: 
+          SOURCE_BUCKET: !Ref rawBucket
+          DESTINATION_BUCKET: !Ref stagingBucket
