@@ -32,7 +32,7 @@ def lambda_handler(event, context):
                     shutil.copyfileobj(f_in, f_out)
             # upload unzip file
             fn = f'{local_csv_file.split("/")[-1]}'
-            prefix = fn[:-7]
+            prefix = fn[:-4]
             dest_key = f"{prefix}/{fn}"
             s3_client.upload_file(local_csv_file, destination_bucket, dest_key)
         elif key.endswith('.csv'):
