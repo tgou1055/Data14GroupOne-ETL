@@ -2,9 +2,12 @@ import boto3
 import os
 import gzip
 import shutil
+import logging
 
 s3 = boto3.resource('s3')
 s3_client = boto3.client('s3')
+logging.basicConfig(level=logging.WARNING)
+
 
 def lambda_handler(event, context):
     source_bucket = os.environ['SOURCE_BUCKET']
@@ -19,10 +22,10 @@ def lambda_handler(event, context):
         # if gz file, first gunzip, other file types will be just copied
         if key.endswith('.csv.gz'):
             print(f"unzipping {key}")
-            #first download to the tmp folder
+            # first download to the tmp folder
             local_gz_file = f'/tmp/{key.split("/")[-1]}'
             s3_client.download_file(source_bucket, key, local_gz_file)
-            #unzip
+            # unzip
             local_csv_file = local_gz_file[:-3]
             with gzip.open(local_gz_file, 'rb') as f_in:
                 with open(local_csv_file, 'wb') as f_out:
@@ -39,10 +42,8 @@ def lambda_handler(event, context):
             dest_key = f"{fn}/{prefix}"
             s3.meta.client.copy(copy_source, destination_bucket, dest_key)
         else:
-            print(f"raw2staging: {key} doesn't end with .csv.gz nor .csv")
+            logging.warning(f"raw2staging: File {key} does not end with .csv.gz or .csv and will not be processed.")
     return {
         'statusCode': 200,
         'body': 'raw2staging: ingestion complete.'
     }
-        
-        
