@@ -5,7 +5,7 @@ set -e
 
 # Parameters
 SCRIPTS_BUCKET=$1
-#
+
 # zip and upload lambda if updates, and output version to varName
 update_lambda() {
   local lambda_filename=$1
