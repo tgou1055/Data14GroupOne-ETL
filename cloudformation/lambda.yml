@@ -4,7 +4,9 @@ Parameters:
     Type: String
   rawBucket:
     Type: String
-  transformedBucket:
+  stagingBucket:
+    Type: String
+  lambdaRaw2stagingVersion:
     Type: String
 
 Resources:
@@ -32,9 +34,10 @@ Resources:
       Code:
         S3Bucket: !Ref scriptsBucket
         S3Key: lambda/raw2staging.zip
+        S3ObjectVersion: !Ref lambdaRaw2stagingVersion
       Runtime: python3.12
       Timeout: 60
       Environment: 
         Variables: 
           SOURCE_BUCKET: !Ref rawBucket
-          DESTINATION_BUCKET: !Ref transformedBucket
+          DESTINATION_BUCKET: !Ref stagingBucket

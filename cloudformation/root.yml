@@ -4,7 +4,9 @@ Parameters:
     Type: String
   rawBucket:
     Type: String
-  transformedBucket:
+  stagingBucket:
+    Type: String
+  lambdaRaw2stagingVersion:
     Type: String
 
 Resources:
@@ -22,7 +24,8 @@ Resources:
       Parameters:
         scriptsBucket: !Ref scriptsBucket
         rawBucket: !Ref rawBucket
-        transformedBucket: !Ref transformedBucket
+        stagingBucket: !Ref stagingBucket
+        lambdaRaw2stagingVersion: !Ref lambdaRaw2stagingVersion
 
   # GlueCatalogStack:
   #   Type: 'AWS::CloudFormation::Stack'
