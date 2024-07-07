@@ -15,27 +15,34 @@ def lambda_handler(event, context):
     for obj in objects.get('Contents', []):
         key = obj['Key']
         copy_source = {'Bucket': source_bucket, 'Key': key}
-        
+
         # if gz file, first gunzip, other file types will be just copied
         if key.endswith('.csv.gz'):
+            print(f"unzipping {key}")
             #first download to the tmp folder
             local_gz_file = f'/tmp/{key.split("/")[-1]}'
             s3_client.download_file(source_bucket, key, local_gz_file)
-            
             #unzip
             local_csv_file = local_gz_file[:-3]
             with gzip.open(local_gz_file, 'rb') as f_in:
                 with open(local_csv_file, 'wb') as f_out:
                     shutil.copyfileobj(f_in, f_out)
-            
             # upload unzip file
-            dest_key = f'{local_csv_file.split("/")[-1]}'
+            fn = f'{local_csv_file.split("/")[-1]}'
+            prefix = fn[:-7]
+            dest_key = f"{fn}/{prefix}"
             s3_client.upload_file(local_csv_file, destination_bucket, dest_key)
-
         elif key.endswith('.csv'):
-            dest_key = f'{key.split("/")[-1]}' 
+            print(f"copying {key}")
+            fn = key.split("/")[-1]
+            prefix = fn[:-4]
+            dest_key = f"{fn}/{prefix}"
             s3.meta.client.copy(copy_source, destination_bucket, dest_key)
         else:
             print(f"raw2staging: {key} doesn't end with .csv.gz nor .csv")
+    return {
+        'statusCode': 200,
+        'body': 'raw2staging: ingestion complete.'
+    }
         
         

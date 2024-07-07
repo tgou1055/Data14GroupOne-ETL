@@ -25,7 +25,7 @@ update_lambda() {
     rm -r "$LAMBDA_DIR"
   fi
   version_id=$(aws s3api list-object-versions --bucket "$SCRIPTS_BUCKET" --prefix "lambda/${lambda_filename%.py}.zip" --query 'Versions[?IsLatest].VersionId' --output text)
-  echo "$varName=$version_id"
+#  echo "$varName=$version_id"
   echo "$varName=$version_id" >> $GITHUB_ENV
 }
 
