@@ -17,15 +17,15 @@ Resources:
       Parameters:
         scriptsBucket: !Ref scriptsBucket
 
-  LambdaStack:
-    Type: 'AWS::CloudFormation::Stack'
-    Properties:
-      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/lambda.yml"
-      Parameters:
-        scriptsBucket: !Ref scriptsBucket
-        rawBucket: !Ref rawBucket
-        stagingBucket: !Ref stagingBucket
-        lambdaRaw2stagingVersion: !Ref lambdaRaw2stagingVersion
+  # LambdaStack:
+  #   Type: 'AWS::CloudFormation::Stack'
+  #   Properties:
+  #     TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/lambda.yml"
+  #     Parameters:
+  #       scriptsBucket: !Ref scriptsBucket
+  #       rawBucket: !Ref rawBucket
+  #       stagingBucket: !Ref stagingBucket
+  #       lambdaRaw2stagingVersion: !Ref lambdaRaw2stagingVersion
 
   # GlueCatalogStack:
   #   Type: 'AWS::CloudFormation::Stack'
