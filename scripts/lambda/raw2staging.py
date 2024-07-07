@@ -33,13 +33,13 @@ def lambda_handler(event, context):
             # upload unzip file
             fn = f'{local_csv_file.split("/")[-1]}'
             prefix = fn[:-7]
-            dest_key = f"{fn}/{prefix}"
+            dest_key = f"{prefix}/{fn}"
             s3_client.upload_file(local_csv_file, destination_bucket, dest_key)
         elif key.endswith('.csv'):
             print(f"copying {key}")
             fn = key.split("/")[-1]
             prefix = fn[:-4]
-            dest_key = f"{fn}/{prefix}"
+            dest_key = f"{prefix}/{fn}"
             s3.meta.client.copy(copy_source, destination_bucket, dest_key)
         else:
             logging.warning(f"raw2staging: File {key} does not end with .csv.gz or .csv and will not be processed.")
