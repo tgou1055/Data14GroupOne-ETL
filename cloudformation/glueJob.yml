@@ -5,10 +5,10 @@ Parameters:
     Description: S3 bucket name where scripts will be uploaded
 
 Resources:
-  GlueJobProductsDenormRole:
+  GlueJobETLRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: GlueJobProductsDenormRole
+      RoleName: GlueJobETLRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -20,17 +20,17 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
 
-  GlueJobProductsDenorm:
+  GlueJobETL:
     Type: 'AWS::Glue::Job'
     Properties:
-      Name: GlueJobProductsDenorm
-      Role: !GetAtt GlueJobProductsDenormRole.Arn
+      Name: GlueJobETL
+      Role: !GetAtt GlueJobETLRole.Arn
       Command:
         Name: glueetl
-        ScriptLocation: !Sub s3://${scriptsBucket}/gluejob/products_denorm.py
+        ScriptLocation: !Sub s3://${scriptsBucket}/gluejob/ETL.py
         PythonVersion: '3'
       DefaultArguments:
         '--job-bookmark-option': 'job-bookmark-enable'
       GlueVersion: '4.0'
       MaxCapacity: 2.0
-      Timeout: 15
+      Timeout: 10
