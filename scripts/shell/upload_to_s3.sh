@@ -34,6 +34,7 @@ echo "Uploading CloudFormation templates to S3..."
 aws s3 sync cloudformation/ s3://${SCRIPTS_BUCKET}/cloudformation/
 
 # upload gluejob scripts
+echo "Uploading Glue scripts to S3..."
 aws s3 sync scripts/gluejob/ s3://${SCRIPTS_BUCKET}/gluejob/
 
 # update lambda
