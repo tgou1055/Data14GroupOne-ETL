@@ -20,9 +20,9 @@ print(f"Driver Memory: {driver_memory}")
 
 
 # define functions
-source_bucket = "data14group1-staging"
-dest_bucket = "data14group1-transformed"
-ml_bucket = "data14group1-ml"
+source_bucket = "s3://data14group1-staging"
+dest_bucket = "s3://data14group1-transformed"
+ml_bucket = "s3://data14group1-ml"
 schema = dict()
 
 
