@@ -3,26 +3,35 @@
 
 # In[ ]:
 
+
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 import time
 import os
 
-# remove when uploading to gluejob
+# dev
+# spark = SparkSession.builder.config("spark.executor.memory", "28g").config("spark.driver.memory", "8g").appName(
+#     "data14group1-ETL").getOrCreate()
+# source_bucket = "data14group1-staging"
+# dest_bucket = "data14group1-transformed"
+# ml_bucket = "data14group1-ml"
+
+# prod
 spark = SparkSession.builder.appName("data14group1-ETL").getOrCreate()
+source_bucket = "s3://data14group1-staging"
+dest_bucket = "s3://data14group1-transformed"
+ml_bucket = "s3://data14group1-ml"
+
+
+# In[ ]:
+
 
 executor_memory = spark.conf.get("spark.executor.memory")
 print(f"Executor Memory: {executor_memory}")
 driver_memory = spark.conf.get("spark.driver.memory")
 print(f"Driver Memory: {driver_memory}")
 
-# In[ ]:
-
-
 # define functions
-source_bucket = "s3://data14group1-staging"
-dest_bucket = "s3://data14group1-transformed"
-ml_bucket = "s3://data14group1-ml"
 schema = dict()
 
 
@@ -241,19 +250,16 @@ prod_features = spark.sql("""
 SELECT 
     product_id,
     prod_orders,
-    prod_reorder_probability,
-    prod_reorder_times,
-    prod_reorder_ratio
+    prod_second_orders * 1.0 / prod_first_orders AS prod_reorder_probability,
+    1 + prod_reorders * 1.0 / prod_first_orders AS prod_reorder_times,
+    prod_reorders * 1.0 / prod_orders AS prod_reorder_ratio
 FROM (
     SELECT 
         product_id,
         COUNT(product_id) AS prod_orders,
         SUM(reordered) AS prod_reorders,
         SUM(CASE WHEN product_seq_time = 1 THEN 1 ELSE 0 END) AS prod_first_orders,
-        SUM(CASE WHEN product_seq_time = 2 THEN 1 ELSE 0 END) AS prod_second_orders,
-        prod_second_orders * 1.0 / prod_first_orders AS prod_reorder_probability,
-        1 + prod_reorders * 1.0 / prod_first_orders AS prod_reorder_times,
-        prod_reorders / prod_orders AS prod_reorder_ratio
+        SUM(CASE WHEN product_seq_time = 2 THEN 1 ELSE 0 END) AS prod_second_orders
     FROM (
         SELECT
             product_id,
