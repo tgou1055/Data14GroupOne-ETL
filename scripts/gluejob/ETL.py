@@ -5,22 +5,17 @@
 
 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import *
 import time
 import os
 
-# dev
-# spark = SparkSession.builder.config("spark.executor.memory", "28g").config("spark.driver.memory", "8g").appName(
-#     "data14group1-ETL").getOrCreate()
-# source_bucket = "data14group1-staging"
-# dest_bucket = "data14group1-transformed"
-# ml_bucket = "data14group1-ml"
+
 
 # prod
 spark = SparkSession.builder.appName("data14group1-ETL").getOrCreate()
 source_bucket = "s3://data14group1-staging"
 dest_bucket = "s3://data14group1-transformed"
 ml_bucket = "s3://data14group1-ml"
+
 
 
 # In[ ]:
@@ -32,19 +27,9 @@ driver_memory = spark.conf.get("spark.driver.memory")
 print(f"Driver Memory: {driver_memory}")
 
 # define functions
-schema = dict()
-
-
-def readFromCSV(dfName, bucket=source_bucket):
-    return spark.read.csv(os.path.join(bucket, dfName),
-                          header=True,
-                          schema=schema[dfName])
-
-
 def createTempView(dfName, bucket=dest_bucket, prefix=None):
     df = spark.read.parquet(os.path.join(*[p for p in [bucket, prefix, dfName] if p]))
     df.createOrReplaceTempView(dfName)
-
 
 def saveAsParquet(df, dfName, bucket=dest_bucket, prefix=None):
     path = os.path.join(*[p for p in [bucket, prefix, dfName] if p])
@@ -52,11 +37,10 @@ def saveAsParquet(df, dfName, bucket=dest_bucket, prefix=None):
     print(f"{dfName} #. of partitions: {df.rdd.getNumPartitions()}")
     print(f"saved as parquet to {path}\n")
 
-
 class Timer:
     def __init__(self, name):
         self.name = name
-
+        
     def __enter__(self):
         self.start_time = time.time()
         return self
@@ -67,86 +51,14 @@ class Timer:
         print(f"{self.name} execution time: {self.execution_time:.3f} seconds")
 
 
-# ## save aisles, departments and products as parquet
-
-# In[ ]:
-
-
-schema["aisles"] = StructType([
-    StructField("aisle_id", IntegerType(), True),
-    StructField("aisle", StringType(), True)
-])
-schema["departments"] = StructType([
-    StructField("department_id", IntegerType(), True),
-    StructField("department", StringType(), True)
-])
-schema["products"] = StructType([
-    StructField("product_id", IntegerType(), True),
-    StructField("product_name", StringType(), True),
-    StructField("aisle_id", IntegerType(), True),
-    StructField("department_id", IntegerType(), True)
-])
-
-saveAsParquet(readFromCSV("aisles"), "aisles", prefix="intermediate")
-saveAsParquet(readFromCSV("departments"), "departments", prefix="intermediate")
-saveAsParquet(readFromCSV("products"), "products", prefix="intermediate")
-
-# ## denorm products
-
-# In[ ]:
-
-
-createTempView("aisles", prefix="intermediate")
-createTempView("departments", prefix="intermediate")
-createTempView("products", prefix="intermediate")
-
-products_denorm = spark.sql("""
-SELECT
-    *
-FROM
-    products
-JOIN
-    aisles USING (aisle_id)
-JOIN
-    departments USING (department_id)
-""")
-
-saveAsParquet(products_denorm, "products_denorm", prefix="intermediate")
-
-# ## save orders, order_products_prior to parquet
-
-# In[ ]:
-
-
-schema["orders"] = StructType([
-    StructField("order_id", IntegerType(), True),
-    StructField("user_id", IntegerType(), True),
-    StructField("eval_set", StringType(), True),
-    StructField("order_number", IntegerType(), True),
-    StructField("order_dow", ByteType(), True),
-    StructField("order_hour_of_day", ByteType(), True),
-    StructField("days_since_prior_order", FloatType(), True)
-])
-schema["order_products__prior"] = StructType([
-    StructField("order_id", IntegerType(), True),
-    StructField("product_id", IntegerType(), True),
-    StructField("add_to_cart_order", IntegerType(), True),
-    StructField("reordered", IntegerType(), True)
-])
-schema["order_products__train"] = schema["order_products__prior"]
-with Timer("save orders.csv to parquet"):
-    saveAsParquet(readFromCSV("orders"), "orders", prefix="intermediate")
-with Timer("save order_products__prior.csv to parquet"):
-    saveAsParquet(readFromCSV("order_products__prior"), "order_products__prior", prefix="intermediate")
-with Timer("save order_products__train.csv to parquet"):
-    saveAsParquet(readFromCSV("order_products__train"), "order_products__train", prefix="intermediate")
-
 # In[ ]:
 
 
 createTempView("orders", prefix="intermediate")
 createTempView("order_products__prior", prefix="intermediate")
 createTempView("order_products__train", prefix="intermediate")
+createTempView("products_denorm", prefix="intermediate")
+
 
 # In[ ]:
 
@@ -160,10 +72,9 @@ JOIN
     order_products__prior USING (order_id)
 WHERE
     eval_set = 'prior'
-""")
+""").cache()
+order_products_prior.createOrReplaceTempView("order_products_prior")
 
-with Timer("order_products_prior"):
-    saveAsParquet(order_products_prior, "order_products_prior", prefix="intermediate")
 
 # In[ ]:
 
@@ -175,11 +86,11 @@ FROM
     orders
 JOIN 
     order_products__train USING (order_id)
-WHERE 
+WHERE
     eval_set = 'train'
 """)
-with Timer("order_products_train"):
-    saveAsParquet(order_products_train, "order_products_train", prefix="intermediate")
+order_products_train.createOrReplaceTempView("order_products_train")
+
 
 # ## Q2 user order interaction
 
@@ -196,15 +107,10 @@ FROM orders
 WHERE eval_set='prior'
 GROUP BY user_id
 """)
-with Timer("user_features_1"):
-    saveAsParquet(user_features_1, "user_features_1", prefix="features")
+user_features_1.createOrReplaceTempView("user_features_1")
+
 
 # ## Q3 user product interaction
-
-# In[ ]:
-
-
-createTempView("order_products_prior", prefix="intermediate")
 
 # In[ ]:
 
@@ -219,8 +125,8 @@ SELECT
 FROM order_products_prior
 GROUP BY user_id
 """)
-with Timer("user_features_2"):
-    saveAsParquet(user_features_2, "user_features_2", prefix="features")
+user_features_2.createOrReplaceTempView("user_features_2")
+
 
 # ## Q4
 
@@ -238,8 +144,8 @@ SELECT
 FROM order_products_prior
 GROUP BY user_id, product_id
 """)
-with Timer("up_features"):
-    saveAsParquet(up_features, "up_features", prefix="features")
+up_features.createOrReplaceTempView("up_features")
+
 
 # ## Q5
 
@@ -270,18 +176,10 @@ FROM (
     GROUP BY product_id
 )
 """)
-with Timer("prod_features"):
-    saveAsParquet(prod_features, "prod_features", prefix="features")
+prod_features.createOrReplaceTempView("prod_features")
+
 
 # ## Join features together and add a few more
-
-# In[ ]:
-
-
-createTempView("user_features_1", prefix="features")
-createTempView("user_features_2", prefix="features")
-createTempView("up_features", prefix="features")
-createTempView("prod_features", prefix="features")
 
 # In[ ]:
 
@@ -300,45 +198,49 @@ FROM (
 )
 JOIN up_features USING (user_id)
 JOIN prod_features USING (product_id)
-""")
-with Timer("output"):
-    saveAsParquet(output, "output", prefix="features")
+""").cache()
+output.createOrReplaceTempView("output")
 
-# In[ ]:
-
-
-createTempView("output", prefix="features")
-createTempView("order_products_train", prefix="intermediate")
 
 # ## create train and test data
 
 # In[ ]:
 
 
-train = spark.sql("""
+order_products_prior.unpersist()
+
+
+# In[ ]:
+
+
+trainval = spark.sql("""
 SELECT 
     *
 FROM 
     output
 JOIN 
-    (SELECT
+    (
+    SELECT DISTINCT user_id 
+    FROM orders 
+    WHERE eval_set = 'train'
+    ) 
+USING (user_id)
+LEFT JOIN 
+    (
+    SELECT
         user_id,
         product_id,
         reordered
     FROM order_products_train
     )
-USING 
-    (user_id, product_id)
+USING (user_id, product_id);
+
 """).drop("user_id", "product_id")
-columns = train.columns
-train = train.select(*[columns[-1], *columns[:-1]])  # put last column (reordered) as first
-with Timer("train"):
-    saveAsParquet(train, "train", bucket=ml_bucket)
+columns = trainval.columns
+trainval = trainval.select(*[columns[-1], *columns[:-1]]) # put last column (reordered) as first
+with Timer("trainval"):
+    saveAsParquet(trainval, "trainval", bucket=ml_bucket, prefix="data")
 
-# In[ ]:
-
-
-createTempView("products_denorm", prefix="intermediate")
 
 # In[ ]:
 
@@ -361,14 +263,25 @@ JOIN (
 ) USING (product_id)
 """)
 with Timer("test"):
-    saveAsParquet(test, "test", bucket=ml_bucket)
+    saveAsParquet(test, "test", bucket=ml_bucket, prefix="data")
+
+
+# In[ ]:
+
+
+output.unpersist()
+
+
+# # stop spark session
 
 # In[ ]:
 
 
 spark.stop()
 
+
 # In[ ]:
+
 
 
 
