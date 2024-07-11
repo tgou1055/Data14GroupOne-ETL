@@ -235,7 +235,7 @@ LEFT JOIN
     )
 USING (user_id, product_id);
 
-""").drop("user_id", "product_id")
+""").drop("user_id", "product_id").fillna({'reordered': 0})
 columns = trainval.columns
 trainval = trainval.select(*[columns[-1], *columns[:-1]]) # put last column (reordered) as first
 with Timer("trainval"):
