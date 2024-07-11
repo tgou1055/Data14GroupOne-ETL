@@ -5,10 +5,10 @@ Parameters:
     Description: S3 bucket name where scripts will be uploaded
 
 Resources:
-  GlueJobETLRole:
+  GlueJobRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: GlueJobETLRole
+      RoleName: GlueJobRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -20,11 +20,26 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
 
+  GlueJobCsv2Parquet:
+    Type: 'AWS::Glue::Job'
+    Properties:
+      Name: GlueJobCsv2Parquet
+      Role: !GetAtt GlueJobRole.Arn
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub s3://${scriptsBucket}/gluejob/csv2parquet.py
+        PythonVersion: '3'
+      DefaultArguments:
+        '--job-bookmark-option': 'job-bookmark-enable'
+      GlueVersion: '4.0'
+      MaxCapacity: 2.0
+      Timeout: 5
+
   GlueJobETL:
     Type: 'AWS::Glue::Job'
     Properties:
       Name: GlueJobETL
-      Role: !GetAtt GlueJobETLRole.Arn
+      Role: !GetAtt GlueJobRole.Arn
       Command:
         Name: glueetl
         ScriptLocation: !Sub s3://${scriptsBucket}/gluejob/ETL.py
