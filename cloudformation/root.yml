@@ -6,6 +6,10 @@ Parameters:
     Type: String
   stagingBucket:
     Type: String
+  transformedBucket:
+    Type: String
+  mlBucket:
+    Type: String
   lambdaRaw2stagingVersion:
     Type: String
 
@@ -27,16 +31,25 @@ Resources:
         stagingBucket: !Ref stagingBucket
         lambdaRaw2stagingVersion: !Ref lambdaRaw2stagingVersion
 
-  # GlueCatalogStack:
-  #   Type: 'AWS::CloudFormation::Stack'
-  #   Properties:
-  #     TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueCatalog.yml"
+  GlueCatalogStagingStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueCatalogStaging.yml"
+      Parameters:
+        stagingBucket: !Ref stagingBucket
 
-  # StepFunctionStack:
-  #   Type: 'AWS::CloudFormation::Stack'
-  #   Properties:
-  #     TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
-  #     Parameters:
-  #       scriptsBucket: !Ref scriptsBucket
+  GlueCatalogTransformedStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueCatalogTransformed.yml"
+      Parameters:
+        transformedBucket: !Ref transformedBucket
+
+#  StepFunctionStack:
+#    Type: 'AWS::CloudFormation::Stack'
+#    Properties:
+#      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
+#      Parameters:
+#        scriptsBucket: !Ref scriptsBucket
 
 

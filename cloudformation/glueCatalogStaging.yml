@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  stagingBucket:
+    Type: String
+
+Resources:
+  GlueDatabase:
+    Type: 'AWS::Glue::Database'
+    Properties:
+      CatalogId: !Ref "AWS::AccountId"
+      DatabaseInput:
+        Name: staging
+
+  ProductsTable:
+    Type: 'AWS::Glue::Table'
+    Properties:
+      DatabaseName: !Ref GlueDatabase
+      CatalogId: !Ref "AWS::AccountId"
+      TableInput:
+        Name: products
+        StorageDescriptor:
+          Columns:
+            - Name: product_id
+              Type: int
+            - Name: product_name
+              Type: string
+            - Name: aisle_id
+              Type: int
+            - Name: department_id
+              Type: int
+          Location: !Sub "s3://${stagingBucket}/products/"
+          InputFormat: "org.apache.hadoop.mapred.TextInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+          SerdeInfo:
+            SerializationLibrary: "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
+            Parameters:
+              'field.delim': ','
+              'skip.header.line.count': '1'
+
+  DepartmentsTable:
+    Type: 'AWS::Glue::Table'
+    Properties:
+      DatabaseName: !Ref GlueDatabase
+      CatalogId: !Ref "AWS::AccountId"
+      TableInput:
+        Name: departments
+        StorageDescriptor:
+          Columns:
+            - Name: department_id
+              Type: int
+            - Name: department
+              Type: string
+          Location: !Sub "s3://${stagingBucket}/departments/"
+          InputFormat: "org.apache.hadoop.mapred.TextInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+          SerdeInfo:
+            SerializationLibrary: "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
+            Parameters:
+              'field.delim': ','
+              'skip.header.line.count': '1'
+
+  AislesTable:
+    Type: 'AWS::Glue::Table'
+    Properties:
+      DatabaseName: !Ref GlueDatabase
+      CatalogId: !Ref "AWS::AccountId"
+      TableInput:
+        Name: aisles
+        StorageDescriptor:
+          Columns:
+            - Name: aisle_id
+              Type: int
+            - Name: aisle
+              Type: string
+          Location: !Sub "s3://${stagingBucket}/aisles/"
+          InputFormat: "org.apache.hadoop.mapred.TextInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+          SerdeInfo:
+            SerializationLibrary: "org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe"
+            Parameters:
+              'field.delim': ','
+              'skip.header.line.count': '1'
