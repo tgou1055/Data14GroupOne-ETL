@@ -20,14 +20,14 @@ Resources:
         Name: products
         StorageDescriptor:
           Columns:
-            - Name: product_id
-              Type: int
-            - Name: product_name
-              Type: string
-            - Name: aisle_id
-              Type: int
-            - Name: department_id
-              Type: int
+            - Name: 'product_id'
+              Type: 'int'
+            - Name: 'product_name'
+              Type: 'string'
+            - Name: 'aisle_id'
+              Type: 'int'
+            - Name: 'department_id'
+              Type: 'int'
           Location: !Sub "s3://${transformedBucket}/intermediate/products/"
           InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
           OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
@@ -43,10 +43,10 @@ Resources:
         Name: departments
         StorageDescriptor:
           Columns:
-            - Name: department_id
-              Type: int
-            - Name: department
-              Type: string
+            - Name: 'department_id'
+              Type: 'int'
+            - Name: 'department'
+              Type: 'string'
           Location: !Sub "s3://${transformedBucket}/intermediate/departments/"
           InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
           OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
@@ -62,10 +62,10 @@ Resources:
         Name: aisles
         StorageDescriptor:
           Columns:
-            - Name: aisle_id
-              Type: int
-            - Name: aisle
-              Type: string
+            - Name: 'aisle_id'
+              Type: 'int'
+            - Name: 'aisle'
+              Type: 'string'
           Location: !Sub "s3://${transformedBucket}/intermediate/aisles/"
           InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
           OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
@@ -81,19 +81,94 @@ Resources:
         Name: products_denorm
         StorageDescriptor:
           Columns:
-            - Name: product_id
-              Type: int
-            - Name: product_name
-              Type: string
-            - Name: aisle_id
-              Type: int
-            - Name: aisle
-              Type: string
-            - Name: department_id
-              Type: int
-            - Name: department
-              Type: string
+            - Name: 'product_id'
+              Type: 'int'
+            - Name: 'product_name'
+              Type: 'string'
+            - Name: 'aisle_id'
+              Type: 'int'
+            - Name: 'aisle'
+              Type: 'string'
+            - Name: 'department_id'
+              Type: 'int'
+            - Name: 'department'
+              Type: 'string'
           Location: !Sub "s3://${transformedBucket}/intermediate/products_denorm/"
+          InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+          SerdeInfo:
+            SerializationLibrary: "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+
+  OrdersTable:
+    Type: 'AWS::Glue::Table'
+    Properties:
+      DatabaseName: !Ref GlueDatabase
+      CatalogId: !Ref "AWS::AccountId"
+      TableInput:
+        Name: orders
+        StorageDescriptor:
+          Columns:
+            - Name: 'order_id'
+              Type: 'int'
+            - Name: 'user_id'
+              Type: 'int'
+            - Name: 'eval_set'
+              Type: 'string'
+            - Name: 'order_number'
+              Type: 'int'
+            - Name: 'order_dow'
+              Type: 'tinyint'
+            - Name: 'order_hour_of_day'
+              Type: 'tinyint'
+            - Name: 'days_since_prior_order'
+              Type: 'float'
+          Location: !Sub "s3://${transformedBucket}/intermediate/orders/"
+          InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+          SerdeInfo:
+            SerializationLibrary: "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+
+  OrderProductsPriorTable:
+    Type: 'AWS::Glue::Table'
+    Properties:
+      DatabaseName: !Ref GlueDatabase
+      CatalogId: !Ref "AWS::AccountId"
+      TableInput:
+        Name: order_products__prior
+        StorageDescriptor:
+          Columns:
+            - Name: 'order_id'
+              Type: 'int'
+            - Name: 'product_id'
+              Type: 'int'
+            - Name: 'add_to_cart_order'
+              Type: 'int'
+            - Name: 'reordered'
+              Type: 'int'
+          Location: !Sub "s3://${transformedBucket}/intermediate/order_products__prior/"
+          InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+          SerdeInfo:
+            SerializationLibrary: "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+
+  OrderProductsTrainTable:
+    Type: 'AWS::Glue::Table'
+    Properties:
+      DatabaseName: !Ref GlueDatabase
+      CatalogId: !Ref "AWS::AccountId"
+      TableInput:
+        Name: order_products__train
+        StorageDescriptor:
+          Columns:
+            - Name: 'order_id'
+              Type: 'int'
+            - Name: 'product_id'
+              Type: 'int'
+            - Name: 'add_to_cart_order'
+              Type: 'int'
+            - Name: 'reordered'
+              Type: 'int'
+          Location: !Sub "s3://${transformedBucket}/intermediate/order_products__train/"
           InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
           OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
           SerdeInfo:
