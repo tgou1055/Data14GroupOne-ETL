@@ -19,6 +19,14 @@ on:
         description: "S3 bucket name where staging data is stored"
         required: true
         default: data14group1-staging
+      transformedBucket:
+        description: "S3 bucket name where transformed data is stored"
+        required: true
+        default: data14group1-transformed
+      mlBucket:
+        description: "S3 bucket name where ml data is stored"
+        required: true
+        default: data14group1-ml
 
 jobs:
   cfn-deployment:
@@ -51,6 +59,8 @@ jobs:
             scriptsBucket=${{ github.event.inputs.scriptsBucket }},
             rawBucket=${{ github.event.inputs.rawBucket }},
             stagingBucket=${{ github.event.inputs.stagingBucket }},
+            transformedBucket=${{ github.event.inputs.transformedBucket }},
+            mlBucket=${{ github.event.inputs.mlBucket }},
             lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }}
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"

@@ -1,11 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  transformedBucket:
+    Type: String
+
 Resources:
   GlueDatabase:
     Type: 'AWS::Glue::Database'
     Properties:
       CatalogId: !Ref "AWS::AccountId"
       DatabaseInput:
-        Name: transformed_data
+        Name: transformed
 
   ProductsTable:
     Type: 'AWS::Glue::Table'
@@ -24,7 +28,7 @@ Resources:
               Type: int
             - Name: department_id
               Type: int
-          Location: "s3://data14group1-transformed/products/"
+          Location: !Sub "s3://${transformedBucket}/intermediate/products/"
           InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
           OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
           SerdeInfo:
@@ -43,7 +47,7 @@ Resources:
               Type: int
             - Name: department
               Type: string
-          Location: "s3://data14group1-transformed/departments/"
+          Location: !Sub "s3://${transformedBucket}/intermediate/departments/"
           InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
           OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
           SerdeInfo:
@@ -62,7 +66,7 @@ Resources:
               Type: int
             - Name: aisle
               Type: string
-          Location: "s3://data14group1-transformed/aisles/"
+          Location: !Sub "s3://${transformedBucket}/intermediate/aisles/"
           InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
           OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
           SerdeInfo:
@@ -89,7 +93,7 @@ Resources:
               Type: int
             - Name: department
               Type: string
-          Location: "s3://data14group1-transformed/products_denorm/"
+          Location: !Sub "s3://${transformedBucket}/intermediate/products_denorm/"
           InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
           OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
           SerdeInfo:
