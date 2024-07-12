@@ -45,6 +45,13 @@ Resources:
       Parameters:
         transformedBucket: !Ref transformedBucket
 
+  GlueCatalogMLStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueCatalogML.yml"
+      Parameters:
+        transformedBucket: !Ref mlBucket
+
 #  StepFunctionStack:
 #    Type: 'AWS::CloudFormation::Stack'
 #    Properties:
