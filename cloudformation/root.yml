@@ -71,7 +71,7 @@ Resources:
         LambdaFunctionArn:
           Fn::GetAtt:
             - LambdaStack
-            - Outputs.CopyFilesLambdaArn
+            - Outputs.LambdaFunctionArn
 
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
