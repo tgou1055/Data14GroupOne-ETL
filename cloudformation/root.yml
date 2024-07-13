@@ -63,12 +63,12 @@ Resources:
       TopicName: GlueJobFailureNotifications
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
-  StepFunctionStack:
-    Type: 'AWS::CloudFormation::Stack'
-    Properties:
-      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
-      Parameters:
-        LambdaFunctionArn: "deploy-stack-LambdaStack-1QXNW0EVSAG4O-CopyFilesLambdaArn"
+#  StepFunctionStack:
+#    Type: 'AWS::CloudFormation::Stack'
+#    Properties:
+#      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
+#      Parameters:
+#        LambdaFunctionArn: "deploy-stack-LambdaStack-1QXNW0EVSAG4O-CopyFilesLambdaArn"
 
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
