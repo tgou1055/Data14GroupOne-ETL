@@ -34,6 +34,7 @@ Resources:
   PipelineStateMachine:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      StateMachineName: PipelineStateMachine
       RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
       DefinitionS3Location:
         Bucket: !Ref scriptsBucket

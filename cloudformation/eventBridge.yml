@@ -29,11 +29,10 @@ Resources:
   EventBridgeRule:
     Type: AWS::Events::Rule
     Properties:
+      EventBusName: EventBridgeRule
       ScheduleExpression: rate(1 day)
       State: ENABLED
       Targets:
         - Arn: !Ref StateMachineArn
           Id: "StepFunctionTarget"
           RoleArn: !GetAtt EventBridgeInvokeStepFunctionRole.Arn
-
-#
