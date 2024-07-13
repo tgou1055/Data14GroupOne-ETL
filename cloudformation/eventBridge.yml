@@ -30,7 +30,6 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Name: DailyTrigger
-      EventBusName: EventBridgeRule
       ScheduleExpression: rate(1 day)
       State: ENABLED
       Targets:
