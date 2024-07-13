@@ -48,3 +48,4 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': 'raw2staging: ingestion complete.'
     }
+#
