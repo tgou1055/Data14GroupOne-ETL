@@ -62,24 +62,18 @@ Resources:
     Properties:
       TopicName: GlueJobFailureNotifications
 
-  # SNS Topic Subscription
-  SNSSubscription:
-    Type: AWS::SNS::Subscription
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
+  StepFunctionStack:
+    Type: 'AWS::CloudFormation::Stack'
     Properties:
-      TopicArn: !Ref SNSTopic
-      Protocol: email
-      Endpoint: !Ref rootEmail
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
+      Parameters:
+        LambdaFunctionArn:
+          Fn::ImportValue:
+            !Sub "${LambdaStack}-CopyFilesLambdaArn"
 
-#  StepFunctionStack:
-#    Type: 'AWS::CloudFormation::Stack'
-#    Properties:
-#      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
-#      Parameters:
-#        LambdaFunctionArn:
-#          ImportValue: !Sub "${LambdaStack}-CopyFilesLambdaArn"
 
-  # EventBridge Rule
-  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/walkthrough-crossstackref.html
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
 #  EventBridgeStack:
 #    Type: AWS::CloudFormation::Stack
 #    Properties:
@@ -87,6 +81,7 @@ Resources:
 #      TimeoutInMinutes: 10
 #      Parameters:
 #        StateMachineArn:
-#          ImportValue: !Sub "${StepFunctionStack}-StateMachineArn"
+#          Fn::ImportValue:
+#            !Sub "${StepFunctionStack}-StateMachineArn"
 
 
