@@ -44,8 +44,7 @@ def lambda_handler(event, context):
     #     else:
     #         logging.warning(f"raw2staging: File {key} does not end with .csv.gz or .csv and will not be processed.")
     print('hello world')
-    return {
+    return {"raw2staging": {
         'statusCode': 200,
         'body': 'raw2staging: ingestion complete.'
-    }
-#
+    }}
