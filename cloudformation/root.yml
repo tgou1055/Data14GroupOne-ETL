@@ -71,6 +71,7 @@ Resources:
         LambdaFunctionArn:
           Fn::ImportValue:
             !Sub "CopyFilesLambdaArn"
+      DependsOn: LambdaStack
 
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
