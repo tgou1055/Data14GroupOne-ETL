@@ -70,7 +70,7 @@ Resources:
       Parameters:
         LambdaFunctionArn:
           Fn::ImportValue:
-            'Fn::Sub': "${LambdaStack}-CopyFilesLambdaArn"
+            !Sub "LambdaStack-CopyFilesLambdaArn"
 
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
