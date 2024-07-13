@@ -65,6 +65,7 @@ jobs:
             stagingBucket=${{ github.event.inputs.stagingBucket }},
             transformedBucket=${{ github.event.inputs.transformedBucket }},
             mlBucket=${{ github.event.inputs.mlBucket }},
-            lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }}
+            lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }},
+            rootEmail=${{  secrets.ROOT_EMAIL  }}
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"

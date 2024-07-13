@@ -43,3 +43,10 @@ Resources:
           DESTINATION_BUCKET: !Ref stagingBucket
       EphemeralStorage:
         Size: 1024
+
+Outputs:
+  LambdaFunctionArn:
+    Description: "CopyFilesLambda ARN"
+    Value: !GetAtt CopyFilesLambda.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-CopyFilesLambdaArn"

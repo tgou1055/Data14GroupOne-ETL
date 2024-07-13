@@ -12,6 +12,8 @@ Parameters:
     Type: String
   lambdaRaw2stagingVersion:
     Type: String
+  rootEmail:
+    Type: String
 
 Resources:
   GlueJobStack:
@@ -52,11 +54,38 @@ Resources:
       Parameters:
         mlBucket: !Ref mlBucket
 
-#  StepFunctionStack:
-#    Type: 'AWS::CloudFormation::Stack'
-#    Properties:
-#      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
-#      Parameters:
-#        scriptsBucket: !Ref scriptsBucket
+
+
+  # SNS Topic
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: GlueJobFailureNotifications
+
+  # SNS Topic Subscription
+  SNSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref SNSTopic
+      Protocol: email
+      Endpoint: !Ref rootEmail
+
+  StepFunctionStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
+      Parameters:
+        LambdaFunctionArn: !ImportValue
+          !Sub "${LambdaStack}-CopyFilesLambdaArn"
+
+  # EventBridge Rule
+  EventBridgeStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml
+      TimeoutInMinutes: 10
+      Parameters:
+        StateMachineArn: !ImportValue
+          !Sub "${StepFunctionStack}-StateMachineArn"
 
 

@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Template to create an EventBridge rule to trigger the Step Function.
+
+Parameters:
+  StateMachineArn:
+    Type: String
+    Description: ARN of the Step Function
+
+Resources:
+  # IAM Role for EventBridge to trigger Step Functions
+  EventBridgeInvokeStepFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowEventBridgeToInvokeStepFunction
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Ref StateMachineArn
+
+  # EventBridge Rule
+  EventBridgeRule:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: rate(1 day)
+      State: ENABLED
+      Targets:
+        - Arn: !Ref StateMachineArn
+          Id: "StepFunctionTarget"
+          RoleArn: !GetAtt EventBridgeInvokeStepFunctionRole.Arn
+
+#Outputs:
+#  EventBridgeRuleArn:
+#    Description: "EventBridge Rule ARN"
+#    Value: !Ref EventBridgeRule

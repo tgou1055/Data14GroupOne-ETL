@@ -1,24 +1,44 @@
 {
-    "Comment": "data14 group1 datalake pipeline statemachine",
-    "StartAt": "CopyFiles",
-    "States": {
-      "CopyFiles": {
-        "Type": "Task",
-        "Resource": "arn:aws:states:::lambda:invoke",
-        "Parameters": {
-          "FunctionName": "LambdaRaw2Staging",
-          "Payload": {}
+  "Comment": "A Step Function to run Lambda with SNS notifications",
+  "StartAt": "RunLambda",
+  "States": {
+    "RunLambda": {
+      "Type": "Task",
+      "Resource": "${CopyFilesLambdaArn}",
+      "Next": "CheckLambdaResult",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "NotifyFailure"
+        }
+      ]
+    },
+    "CheckLambdaResult": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.lambda_result.statusCode",
+          "NumericEquals": 200,
+          "Next": "Success"
+        }
+      ],
+      "Default": "NotifyFailure"
+    },
+    "Success": {
+      "Type": "Succeed"
+    },
+    "NotifyFailure": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:GlueJobFailureNotifications",
+        "Message": {
+          "Error": "An error occurred in the Step Function",
+          "Details.$": "$"
         },
-        "Next": "StartGlueJob"
+        "Subject": "Step Function Error Notification"
       },
-      "StartGlueJob": {
-        "Type": "Task",
-        "Resource": "arn:aws:states:::glue:startJobRun.sync",
-        "Parameters": {
-          "JobName": "GlueJobProductsDenorm"
-        },
-        "End": true
-      }
+      "End": true
     }
   }
-  
+}
