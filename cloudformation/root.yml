@@ -70,13 +70,13 @@ Resources:
       Protocol: email
       Endpoint: !Ref rootEmail
 
-  StepFunctionStack:
-    Type: 'AWS::CloudFormation::Stack'
-    Properties:
-      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
-      Parameters:
-        LambdaFunctionArn:
-          ImportValue: !Sub "${LambdaStack}-CopyFilesLambdaArn"
+#  StepFunctionStack:
+#    Type: 'AWS::CloudFormation::Stack'
+#    Properties:
+#      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
+#      Parameters:
+#        LambdaFunctionArn:
+#          ImportValue: !Sub "${LambdaStack}-CopyFilesLambdaArn"
 
   # EventBridge Rule
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/walkthrough-crossstackref.html
