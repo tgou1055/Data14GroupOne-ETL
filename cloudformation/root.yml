@@ -68,7 +68,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
       Parameters:
-        LambdaFunctionArn: !GetAtt LambdaStack.Outputs.CopyFilesLambdaArn
+        CopyFilesLambdaArn: !GetAtt LambdaStack.Outputs.CopyFilesLambdaArn
         scriptsBucket: !Ref scriptsBucket
 
 
