@@ -80,13 +80,13 @@ Resources:
 
   # EventBridge Rule
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/walkthrough-crossstackref.html
-  EventBridgeStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml
-      TimeoutInMinutes: 10
-      Parameters:
-        StateMachineArn:
-          ImportValue: !Sub "${StepFunctionStack}-StateMachineArn"
+#  EventBridgeStack:
+#    Type: AWS::CloudFormation::Stack
+#    Properties:
+#      TemplateURL: !Sub https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml
+#      TimeoutInMinutes: 10
+#      Parameters:
+#        StateMachineArn:
+#          ImportValue: !Sub "${StepFunctionStack}-StateMachineArn"
 
 
