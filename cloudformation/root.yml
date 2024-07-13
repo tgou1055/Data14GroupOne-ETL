@@ -68,10 +68,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
       Parameters:
-        LambdaFunctionArn:
-          Fn::GetAtt:
-            - LambdaStack
-            - Outputs.CopyFilesLambdaArn
+        LambdaFunctionArn: !GetAtt LambdaStack.Outputs.CopyFilesLambdaArn
 
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html

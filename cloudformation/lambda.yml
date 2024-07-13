@@ -46,6 +46,7 @@ Resources:
 
 Outputs:
   CopyFilesLambdaArn:
+    Description: lambda arn
     Value: !GetAtt LambdaRaw2Staging.Arn
-#    Export:
-#      Name: CopyFilesLambdaArn
+    Export:
+      Name: CopyFilesLambdaArn
