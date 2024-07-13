@@ -49,5 +49,4 @@ Outputs:
     Description: "CopyFilesLambda ARN"
     Value: !GetAtt LambdaRaw2Staging.Arn
     Export:
-      Name:
-        'Fn::Sub':  "CopyFilesLambdaArn"
+      Name: !Sub  "${AWS::StackName}-CopyFilesLambdaArn"

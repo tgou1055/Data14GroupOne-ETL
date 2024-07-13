@@ -70,7 +70,7 @@ Resources:
       Parameters:
         LambdaFunctionArn:
           Fn::ImportValue:
-            !Sub "CopyFilesLambdaArn"
+            !Sub "${LambdaStack}-CopyFilesLambdaArn"
       DependsOn: LambdaStack
 
 
