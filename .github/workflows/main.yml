@@ -34,8 +34,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 2 # Fetch the last two commits, used to comparing diff
+#        with:
+#          fetch-depth: 2 # Fetch the last two commits, used to comparing diff
 
       - name: Configure AWS credentials
         id: creds
