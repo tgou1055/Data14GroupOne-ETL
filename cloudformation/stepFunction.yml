@@ -41,6 +41,8 @@ Resources:
         Key: statemachines/dataLakePipeline.json
       DefinitionSubstitutions:
         CopyFilesLambdaArn: !Ref CopyFilesLambdaArn
+        AWSRegion: !Ref "AWS::Region"
+        AWSAccountId: !Ref "AWS::AccountId"
 
 
 

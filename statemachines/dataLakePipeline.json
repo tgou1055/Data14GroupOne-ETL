@@ -31,7 +31,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::sns:publish",
       "Parameters": {
-        "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:GlueJobFailureNotifications",
+        "TopicArn": "arn:aws:sns:${AWSRegion}:${AWSAccountId}:GlueJobFailureNotifications",
         "Message": {
           "Error": "An error occurred in the Step Function",
           "Details.$": "$"
