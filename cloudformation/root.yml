@@ -68,9 +68,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
       Parameters:
-        LambdaFunctionArn:
-          Fn::ImportValue:
-            !Sub "${LambdaStack}-CopyFilesLambdaArn"
+        LambdaFunctionArn: !ImportValue CopyFilesLambdaArn
       DependsOn: LambdaStack
 
 
