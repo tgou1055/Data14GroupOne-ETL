@@ -17,7 +17,7 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.lambda_result.statusCode",
+          "Variable": "$.raw2staging.statusCode",
           "NumericEquals": 200,
           "Next": "Success"
         }
