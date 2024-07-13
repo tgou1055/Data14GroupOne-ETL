@@ -1,7 +1,4 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: >
-  Template to create an EventBridge rule to trigger the Step Function.
-
 Parameters:
   StateMachineArn:
     Type: String
@@ -12,6 +9,7 @@ Resources:
   EventBridgeInvokeStepFunctionRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: EventBridgeInvokeStepFunctionRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -28,7 +26,6 @@ Resources:
                 Action: states:StartExecution
                 Resource: !Ref StateMachineArn
 
-  # EventBridge Rule
   EventBridgeRule:
     Type: AWS::Events::Rule
     Properties:
@@ -39,7 +36,3 @@ Resources:
           Id: "StepFunctionTarget"
           RoleArn: !GetAtt EventBridgeInvokeStepFunctionRole.Arn
 
-#Outputs:
-#  EventBridgeRuleArn:
-#    Description: "EventBridge Rule ARN"
-#    Value: !Ref EventBridgeRule

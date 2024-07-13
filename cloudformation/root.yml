@@ -62,7 +62,7 @@ Resources:
     Properties:
       TopicName: GlueJobFailureNotifications
 
-  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
+  # https://repost.aws/knowledge-center/cloudformation-nested-stacks-values
   StepFunctionStack:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
@@ -72,15 +72,12 @@ Resources:
         scriptsBucket: !Ref scriptsBucket
 
 
-  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
-#  EventBridgeStack:
-#    Type: AWS::CloudFormation::Stack
-#    Properties:
-#      TemplateURL: !Sub https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml
-#      TimeoutInMinutes: 10
-#      Parameters:
-#        StateMachineArn:
-#          Fn::ImportValue:
-#            !Sub "${StepFunctionStack}-StateMachineArn"
+  # https://repost.aws/knowledge-center/cloudformation-nested-stacks-values
+  EventBridgeStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml"
+      Parameters:
+        StateMachineArn: !GetAtt StepFunctionStack.Outputs.StateMachineArn
 
 

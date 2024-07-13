@@ -8,20 +8,11 @@ Parameters:
     Description: S3 bucket name where scripts will be uploaded
 
 Resources:
-  MyStateMachine:
-    Type: AWS::StepFunctions::StateMachine
-    Properties:
-      RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
-      DefinitionS3Location:
-        Bucket: !Ref scriptsBucket
-        Key: statemachines/dataLakePipeline.json
-      DefinitionSubstitutions:
-        CopyFilesLambdaArn: !Ref CopyFilesLambdaArn
 
-  # Step Functions Execution Role
   StepFunctionsExecutionRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: StepFunctionsExecutionRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -39,9 +30,20 @@ Resources:
                   - lambda:InvokeFunction
                   - sns:Publish
                 Resource: '*'
+
+  PipelineStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
+      DefinitionS3Location:
+        Bucket: !Ref scriptsBucket
+        Key: statemachines/dataLakePipeline.json
+      DefinitionSubstitutions:
+        CopyFilesLambdaArn: !Ref CopyFilesLambdaArn
+
+
+
 Outputs:
   StateMachineArn:
     Description: "Step Function ARN"
-    Value: !GetAtt MyStateMachine.Arn
-    Export:
-      Name: !Sub "${AWS::StackName}-StateMachineArn"
+    Value: !GetAtt PipelineStateMachine.Arn
