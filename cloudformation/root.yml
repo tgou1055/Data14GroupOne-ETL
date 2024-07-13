@@ -69,7 +69,6 @@ Resources:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
       Parameters:
         LambdaFunctionArn: "deploy-stack-LambdaStack-1QXNW0EVSAG4O-CopyFilesLambdaArn"
-      DependsOn: LambdaStack
 
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html
