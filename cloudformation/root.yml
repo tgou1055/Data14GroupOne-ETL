@@ -75,17 +75,19 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
       Parameters:
-        LambdaFunctionArn: !ImportValue
-          !Sub "${LambdaStack}-CopyFilesLambdaArn"
+        LambdaFunctionArn:
+          !ImportValue:
+            !Sub "${LambdaStack}-CopyFilesLambdaArn"
 
   # EventBridge Rule
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml
+      TemplateURL: !Sub https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml
       TimeoutInMinutes: 10
       Parameters:
-        StateMachineArn: !ImportValue
-          !Sub "${StepFunctionStack}-StateMachineArn"
+        StateMachineArn:
+          !ImportValue:
+            !Sub "${StepFunctionStack}-StateMachineArn"
 
 
