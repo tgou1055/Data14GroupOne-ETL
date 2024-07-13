@@ -12,7 +12,6 @@ import os
 
 # prod
 spark = SparkSession.builder.appName("data14group1-ETL").getOrCreate()
-source_bucket = "s3://data14group1-staging"
 dest_bucket = "s3://data14group1-transformed"
 ml_bucket = "s3://data14group1-ml"
 
