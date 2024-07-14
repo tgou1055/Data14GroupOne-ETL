@@ -73,24 +73,13 @@ Resources:
               "Parameters": {
                 "JobName": "${GlueJobCsv2ParquetName}"
               },
-              "Next": "CheckGlueJobCsv2ParquetResult",
+              "Next": "RunGlueJobETL",
               "Catch": [
                 {
                   "ErrorEquals": ["States.ALL"],
                   "Next": "NotifyFailure"
                 }
               ]
-            },
-            "CheckGlueJobCsv2ParquetResult": {
-              "Type": "Choice",
-              "Choices": [
-                {
-                  "Variable": "$.GlueJobCsv2Parquet.Status",
-                  "StringEquals": "SUCCEEDED",
-                  "Next": "RunGlueJobETL"
-                }
-              ],
-              "Default": "NotifyFailure"
             },
             "RunGlueJobETL": {
               "Type": "Task",
@@ -98,24 +87,13 @@ Resources:
               "Parameters": {
                 "JobName": "${GlueJobETLName}"
               },
-              "Next": "CheckGlueJobETLResult",
+              "Next": "Success",
               "Catch": [
                 {
                   "ErrorEquals": ["States.ALL"],
                   "Next": "NotifyFailure"
                 }
               ]
-            },
-            "CheckGlueJobETLResult": {
-              "Type": "Choice",
-              "Choices": [
-                {
-                  "Variable": "$.GlueJobETL.Status",
-                  "StringEquals": "SUCCEEDED",
-                  "Next": "Success"
-                }
-              ],
-              "Default": "NotifyFailure"
             },
             "Success": {
               "Type": "Succeed"
