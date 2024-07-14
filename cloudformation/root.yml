@@ -12,6 +12,10 @@ Parameters:
     Type: String
   lambdaRaw2stagingVersion:
     Type: String
+  kmsKeyArnForCsv2Parquet:
+    Type: String
+  kmsKeyArnForETL:
+    Type: String
 
 Resources:
   GlueJobStack:
@@ -20,6 +24,8 @@ Resources:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueJob.yml"
       Parameters:
         scriptsBucket: !Ref scriptsBucket
+        kmsKeyArnForCsv2Parquet: !Ref kmsKeyArnForCsv2Parquet
+        kmsKeyArnForETL: !Ref kmsKeyArnForETL
 
   LambdaStack:
     Type: 'AWS::CloudFormation::Stack'
