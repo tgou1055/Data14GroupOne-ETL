@@ -1,19 +1,15 @@
 import os
-import sys
 import time
 
+from awsglue.transforms import *
+from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
-from awsglue.transforms import *
-from awsglue.utils import getResolvedOptions
-from pyspark.context import SparkContext
 
-args = getResolvedOptions(sys.argv, ["data14group1-ETL"])
-sc = SparkContext()
+sc = SparkContext.getOrCreate()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
-job.init(args["data14group1-ETL"], args)
 
 source_database = "transformed"
 dest_bucket = "s3://data14group1-ml"

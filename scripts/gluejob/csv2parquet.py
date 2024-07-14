@@ -1,20 +1,15 @@
 import os
-import sys
 import time
 
 from awsglue.transforms import *
-from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
 
-# Initialize context and job
-args = getResolvedOptions(sys.argv, ["data14group1-csv2parquet"])
-sc = SparkContext()
+sc = SparkContext.getOrCreate()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
-job.init(args["data14group1-csv2parquet"], args)
 
 dest_bucket = "s3://data14group1-transformed"
 prefix = "intermediate"
