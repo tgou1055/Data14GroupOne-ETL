@@ -11,7 +11,7 @@ Parameters:
     Description: Name of the Gluejob ETL
 
 Resources:
-
+  # https://docs.aws.amazon.com/step-functions/latest/dg/glue-iam.html
   StepFunctionsExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -31,8 +31,14 @@ Resources:
               - Effect: Allow
                 Action:
                   - lambda:InvokeFunction
+                  - glue:StartJobRun
+                  - glue:GetJobRun
+                  - glue:GetJobRuns
+                  - glue:BatchStopJobRun
                   - sns:Publish
                 Resource: '*'
+
+
   # https://docs.aws.amazon.com/step-functions/latest/dg/connect-lambda.html
   # https://docs.aws.amazon.com/step-functions/latest/dg/connect-glue.html
   PipelineStateMachine:
