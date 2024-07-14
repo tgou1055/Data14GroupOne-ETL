@@ -10,6 +10,7 @@ Parameters:
     Type: String
     Description: Name of the Gluejob ETL
 
+
 Resources:
   # https://docs.aws.amazon.com/step-functions/latest/dg/glue-iam.html
   StepFunctionsExecutionRole:
@@ -37,7 +38,6 @@ Resources:
                   - glue:BatchStopJobRun
                   - sns:Publish
                 Resource: '*'
-
 
   # https://docs.aws.amazon.com/step-functions/latest/dg/connect-lambda.html
   # https://docs.aws.amazon.com/step-functions/latest/dg/connect-glue.html

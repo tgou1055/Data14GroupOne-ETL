@@ -1,23 +1,13 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
+import os
 import sys
+import time
+
+from awsglue.context import GlueContext
+from awsglue.job import Job
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
-from awsglue.context import GlueContext
-from awsglue.job import Job
-from awsglue.dynamicframe import DynamicFrame
-from pyspark.sql import SparkSession
-import time
-import os
 
-
-
-# prod
-# Initialize Glue job
 args = getResolvedOptions(sys.argv, ["data14group1-ETL"])
 sc = SparkContext()
 glueContext = GlueContext(sc)
@@ -29,14 +19,12 @@ source_database = "transformed"
 dest_bucket = "s3://data14group1-ml"
 
 
-
-# In[ ]:
-
 # define functions
 def createTempView(database, table_name):
     dynamic_frame = glueContext.create_dynamic_frame.from_catalog(database=database, table_name=table_name)
     df = dynamic_frame.toDF()
     df.createOrReplaceTempView(table_name)
+
 
 def saveAsParquet(df, dfName, bucket=dest_bucket, prefix="data"):
     path = os.path.join(*[p for p in [bucket, prefix, dfName] if p])
@@ -44,10 +32,11 @@ def saveAsParquet(df, dfName, bucket=dest_bucket, prefix="data"):
     print(f"{dfName} #. of partitions: {df.rdd.getNumPartitions()}")
     print(f"saved as parquet to {path}\n")
 
+
 class Timer:
     def __init__(self, name):
         self.name = name
-        
+
     def __enter__(self):
         self.start_time = time.time()
         return self
@@ -58,17 +47,11 @@ class Timer:
         print(f"{self.name} execution time: {self.execution_time:.3f} seconds")
 
 
-# In[ ]:
-
-
+# Q1 prep
 createTempView(source_database, "orders")
 createTempView(source_database, "order_products__prior")
 createTempView(source_database, "order_products__train")
 createTempView(source_database, "products_denorm")
-
-
-# In[ ]:
-
 
 order_products_prior = spark.sql("""
 SELECT 
@@ -82,10 +65,6 @@ WHERE
 """).cache()
 order_products_prior.createOrReplaceTempView("order_products_prior")
 
-
-# In[ ]:
-
-
 order_products_train = spark.sql("""
 SELECT 
     *
@@ -98,12 +77,7 @@ WHERE
 """)
 order_products_train.createOrReplaceTempView("order_products_train")
 
-
-# ## Q2 user order interaction
-
-# In[ ]:
-
-
+# Q2 user order interaction
 user_features_1 = spark.sql("""
 SELECT
     user_id, 
@@ -116,12 +90,7 @@ GROUP BY user_id
 """)
 user_features_1.createOrReplaceTempView("user_features_1")
 
-
-# ## Q3 user product interaction
-
-# In[ ]:
-
-
+# Q3 user product interaction
 user_features_2 = spark.sql("""
 SELECT
     user_id,
@@ -134,12 +103,7 @@ GROUP BY user_id
 """)
 user_features_2.createOrReplaceTempView("user_features_2")
 
-
-# ## Q4
-
-# In[ ]:
-
-
+# Q4
 up_features = spark.sql("""
 SELECT
     user_id,
@@ -153,12 +117,7 @@ GROUP BY user_id, product_id
 """)
 up_features.createOrReplaceTempView("up_features")
 
-
-# ## Q5
-
-# In[ ]:
-
-
+# Q5
 prod_features = spark.sql("""
 SELECT 
     product_id,
@@ -185,12 +144,7 @@ FROM (
 """)
 prod_features.createOrReplaceTempView("prod_features")
 
-
-# ## Join features together and add a few more
-
-# In[ ]:
-
-
+# Join features together and add a few more
 output = spark.sql("""
 SELECT
     *,
@@ -208,18 +162,9 @@ JOIN prod_features USING (product_id)
 """).cache()
 output.createOrReplaceTempView("output")
 
-
-# ## create train and test data
-
-# In[ ]:
-
-
 order_products_prior.unpersist()
 
-
-# In[ ]:
-
-
+# Create train and test data
 trainval = spark.sql("""
 SELECT 
     *
@@ -244,13 +189,9 @@ USING (user_id, product_id);
 
 """).drop("user_id", "product_id").fillna({'reordered': 0})
 columns = trainval.columns
-trainval = trainval.select(*[columns[-1], *columns[:-1]]) # put last column (reordered) as first
+trainval = trainval.select(*[columns[-1], *columns[:-1]])  # put last column (reordered) as first
 with Timer("trainval"):
     saveAsParquet(trainval, "trainval")
-
-
-# In[ ]:
-
 
 test = spark.sql("""
 SELECT *
@@ -272,23 +213,7 @@ JOIN (
 with Timer("test"):
     saveAsParquet(test, "test")
 
-
-# In[ ]:
-
-
 output.unpersist()
 
-
-# # stop spark session
-
-# In[ ]:
-
-
-spark.stop()
-
-
-# In[ ]:
-
-
-
-
+# Commit job
+job.commit()

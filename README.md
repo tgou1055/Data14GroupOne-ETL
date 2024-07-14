@@ -1,4 +1,5 @@
 # Data14GroupOne
+machine learning scripts: https://github.com/samrere/Data14Group1-ML
 ## Standard
 ### Branching:  
 [prefix]/[ticket-number]-[task-name]  
@@ -22,3 +23,4 @@ Added (static) user registration page:
 
 Resolve CP-32
 ```
+

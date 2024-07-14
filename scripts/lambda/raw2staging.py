@@ -12,13 +12,10 @@ logging.basicConfig(level=logging.WARNING)
 def lambda_handler(event, context):
     source_bucket = os.environ['SOURCE_BUCKET']
     destination_bucket = os.environ['DESTINATION_BUCKET']
-    # List all objects in the source bucket
     objects = s3_client.list_objects_v2(Bucket=source_bucket)
-
     for obj in objects.get('Contents', []):
         key = obj['Key']
         copy_source = {'Bucket': source_bucket, 'Key': key}
-
         # if gz file, first gunzip, other file types will be just copied
         if key.endswith('.csv.gz'):
             print(f"unzipping {key}")
