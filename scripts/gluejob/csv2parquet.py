@@ -8,7 +8,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 import time
 import os
-
+raise RuntimeError("test error at gluejob csv2parquet")
 
 
 # prod
