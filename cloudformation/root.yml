@@ -60,9 +60,6 @@ Resources:
       Parameters:
         mlBucket: !Ref mlBucket
 
-
-
-  # SNS Topic
   SNSTopic:
     Type: AWS::SNS::Topic
     Properties:
@@ -86,7 +83,6 @@ Resources:
         GlueJobCsv2ParquetName: !GetAtt GlueJobStack.Outputs.GlueJobCsv2ParquetName
         GlueJobETLName: !GetAtt GlueJobStack.Outputs.GlueJobETLName
 
-
   # https://repost.aws/knowledge-center/cloudformation-nested-stacks-values
 #  EventBridgeStack:
 #    Type: AWS::CloudFormation::Stack
@@ -94,5 +90,3 @@ Resources:
 #      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml"
 #      Parameters:
 #        StateMachineArn: !GetAtt StepFunctionStack.Outputs.StateMachineArn
-
-

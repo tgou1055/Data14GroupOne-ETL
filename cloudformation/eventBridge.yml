@@ -4,8 +4,8 @@ Parameters:
     Type: String
     Description: ARN of the Step Function
 
+
 Resources:
-  # IAM Role for EventBridge to trigger Step Functions
   EventBridgeInvokeStepFunctionRole:
     Type: AWS::IAM::Role
     Properties:

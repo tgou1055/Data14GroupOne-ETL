@@ -10,6 +10,7 @@ Parameters:
     Type: String
     Description: KMS Key ARN for encrypting data in GlueJobETL
 
+
 Resources:
   GlueJobRoleForCsv2Parquet:
     Type: 'AWS::IAM::Role'

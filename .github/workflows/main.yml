@@ -29,7 +29,6 @@ jobs:
       - name: Run upload script
         run: sh scripts/shell/upload_to_s3.sh data14group1-scripts
 
-
       - name: Deploy CloudFormation Stack
         id: deploy-stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1.0.3

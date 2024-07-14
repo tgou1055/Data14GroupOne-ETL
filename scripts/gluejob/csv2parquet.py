@@ -1,46 +1,45 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
-from pyspark.sql import SparkSession
-from pyspark.sql.types import *
-import time
 import os
+import sys
+import time
 
-# prod
-spark = SparkSession.builder.appName("data14group1-csv2parquet").getOrCreate()
-source_bucket = "s3://data14group1-staging"
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+
+# Initialize context and job
+args = getResolvedOptions(sys.argv, ["data14group1-csv2parquet"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["data14group1-csv2parquet"], args)
+
 dest_bucket = "s3://data14group1-transformed"
+prefix = "intermediate"
 
 
-# In[ ]:
-
-
-print("csv2parquet spark session created.")
 # define functions
-schema = dict()
+def readFromCatalog(database, table, createTempView=False):
+    data = glueContext.create_dynamic_frame.from_catalog(database=database, table_name=table)
+    df = data.toDF()
+    if createTempView:
+        df.createOrReplaceTempView(table)
+    return df
 
-def readFromCSV(dfName, bucket=source_bucket):
-    return spark.read.csv(os.path.join(bucket, dfName), 
-                          header=True, 
-                          schema=schema[dfName])
 
-def createTempView(dfName, bucket=dest_bucket, prefix=None):
-    df = spark.read.parquet(os.path.join(*[p for p in [bucket, prefix, dfName] if p]))
-    df.createOrReplaceTempView(dfName)
-
-def saveAsParquet(df, dfName, bucket=dest_bucket, prefix=None):
+def saveAsParquet(df, dfName, bucket=dest_bucket, prefix=prefix):
     path = os.path.join(*[p for p in [bucket, prefix, dfName] if p])
     df.write.mode('overwrite').parquet(path)
     print(f"{dfName} #. of partitions: {df.rdd.getNumPartitions()}")
     print(f"saved as parquet to {path}\n")
 
+
 class Timer:
     def __init__(self, name):
         self.name = name
-        
+
     def __enter__(self):
         self.start_time = time.time()
         return self
@@ -51,40 +50,21 @@ class Timer:
         print(f"{self.name} execution time: {self.execution_time:.3f} seconds")
 
 
-# ## save aisles, departments and products as parquet
+# Save data from csv to parquet
+saveAsParquet(readFromCatalog("staging", "aisles"), "aisles")
+saveAsParquet(readFromCatalog("staging", "departments"), "departments")
+saveAsParquet(readFromCatalog("staging", "products"), "products")
+with Timer("save orders.csv to parquet"):
+    saveAsParquet(readFromCatalog("staging", "orders"), "orders")
+with Timer("save order_products__prior.csv to parquet"):
+    saveAsParquet(readFromCatalog("staging", "order_products__prior"), "order_products__prior")
+with Timer("save order_products__train.csv to parquet"):
+    saveAsParquet(readFromCatalog("staging", "order_products__train"), "order_products__train")
 
-# In[ ]:
-
-
-schema["aisles"] = StructType([
-    StructField("aisle_id", IntegerType(), True),
-    StructField("aisle", StringType(), True)
-])
-schema["departments"] = StructType([
-    StructField("department_id", IntegerType(), True),
-    StructField("department", StringType(), True)
-])
-schema["products"] = StructType([
-    StructField("product_id", IntegerType(), True),
-    StructField("product_name", StringType(), True),
-    StructField("aisle_id", IntegerType(), True),
-    StructField("department_id", IntegerType(), True)
-])
-
-
-saveAsParquet(readFromCSV("aisles"), "aisles", prefix="intermediate")
-saveAsParquet(readFromCSV("departments"), "departments", prefix="intermediate")
-saveAsParquet(readFromCSV("products"), "products", prefix="intermediate")
-
-
-# ## denorm products
-
-# In[ ]:
-
-
-createTempView("aisles", prefix="intermediate")
-createTempView("departments", prefix="intermediate")
-createTempView("products", prefix="intermediate")
+# Denorm products
+readFromCatalog("transformed", "order_products__train", createTempView=True)
+readFromCatalog("transformed", "departments", createTempView=True)
+readFromCatalog("transformed", "products", createTempView=True)
 
 products_denorm = spark.sql("""
 SELECT
@@ -96,49 +76,7 @@ JOIN
 JOIN
     departments USING (department_id)
 """)
+saveAsParquet(products_denorm, "products_denorm")
 
-saveAsParquet(products_denorm, "products_denorm", prefix="intermediate")
-
-
-# ## save orders, order_products_prior to parquet
-
-# In[ ]:
-
-
-schema["orders"] = StructType([
-    StructField("order_id", IntegerType(), True),
-    StructField("user_id", IntegerType(), True),
-    StructField("eval_set", StringType(), True),
-    StructField("order_number", IntegerType(), True),
-    StructField("order_dow", ByteType(), True),
-    StructField("order_hour_of_day", ByteType(), True),
-    StructField("days_since_prior_order", FloatType(), True)
-])
-schema["order_products__prior"] = StructType([
-    StructField("order_id", IntegerType(), True),
-    StructField("product_id", IntegerType(), True),
-    StructField("add_to_cart_order", IntegerType(), True),
-    StructField("reordered", IntegerType(), True)
-])
-schema["order_products__train"] = schema["order_products__prior"]
-with Timer("save orders.csv to parquet"):
-    saveAsParquet(readFromCSV("orders"), "orders", prefix="intermediate")
-with Timer("save order_products__prior.csv to parquet"):
-    saveAsParquet(readFromCSV("order_products__prior"), "order_products__prior", prefix="intermediate")
-with Timer("save order_products__train.csv to parquet"):
-    saveAsParquet(readFromCSV("order_products__train"), "order_products__train", prefix="intermediate")
-
-
-# ## stop spark session
-
-# In[ ]:
-
-
-spark.stop()
-
-
-# In[ ]:
-
-
-
-
+# Commit job
+job.commit()

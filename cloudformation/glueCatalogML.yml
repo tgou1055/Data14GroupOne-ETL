@@ -3,6 +3,7 @@ Parameters:
   mlBucket:
     Type: String
 
+
 Resources:
   GlueDatabase:
     Type: 'AWS::Glue::Database'

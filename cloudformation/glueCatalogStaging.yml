@@ -3,6 +3,7 @@ Parameters:
   stagingBucket:
     Type: String
 
+
 Resources:
   GlueDatabase:
     Type: 'AWS::Glue::Database'
