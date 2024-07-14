@@ -93,13 +93,23 @@ Resources:
               "Parameters": {
                 "JobName": "${GlueJobETLName}"
               },
-              "Next": "Success",
+              "Next": "NotifySuccess",
               "Catch": [
                 {
                   "ErrorEquals": ["States.ALL"],
                   "Next": "NotifyFailure"
                 }
               ]
+            },
+            "NotifySuccess": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:StepFunctionNotifications",
+                "Message": "the Step Function runs successfully",
+                "Subject": "Data14 Group1 Data Pipeline Success Notification"
+              },
+              "Next": "Success"
             },
             "Success": {
               "Type": "Succeed"
@@ -108,7 +118,7 @@ Resources:
               "Type": "Task",
               "Resource": "arn:aws:states:::sns:publish",
               "Parameters": {
-                "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:GlueJobFailureNotifications",
+                "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:StepFunctionNotifications",
                 "Message": {
                   "Error": "An error occurred in the Step Function",
                   "Details.$": "$"
