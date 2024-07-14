@@ -3,7 +3,7 @@ Parameters:
   scriptsBucket:
     Type: String
     Description: S3 bucket name where scripts will be uploaded
-  kmsKeyArnForCsv2Parquet:
+  kmsKeyForDE:
     Type: String
     Description: KMS Key ARN for encrypting data in GlueJobCsv2Parquet
   kmsKeyArnForETL:
@@ -36,7 +36,7 @@ Resources:
                   - kms:Decrypt
                   - kms:Encrypt
                   - kms:GenerateDataKey
-                Resource: !Ref kmsKeyArnForCsv2Parquet
+                Resource: !Ref kmsKeyForDE
 
   GlueJobRole:
     Type: 'AWS::IAM::Role'
@@ -76,7 +76,7 @@ Resources:
       EncryptionConfiguration:
         S3Encryptions:
           - S3EncryptionMode: SSE-KMS
-            KmsKeyArn: !Ref kmsKeyArnForCsv2Parquet
+            KmsKeyArn: !Ref kmsKeyForDE
 
   GlueSecurityConfigurationForETL:
     Type: 'AWS::Glue::SecurityConfiguration'
@@ -99,7 +99,7 @@ Resources:
       DefaultArguments:
         '--job-bookmark-option': 'job-bookmark-enable'
         '--encryption-type': 'SSE-KMS'
-        '--kms-key-arn': !Ref kmsKeyArnForCsv2Parquet
+        '--kms-key-arn': !Ref kmsKeyForDE
       GlueVersion: '4.0'
       MaxCapacity: 2.0
       Timeout: 5
