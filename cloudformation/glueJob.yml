@@ -14,7 +14,6 @@ Resources:
   GlueJobRoleForDataEngineering:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: GlueJobRoleForDataEngineering
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -26,7 +25,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
       Policies:
-        - PolicyName: GlueJobEncryptDecrypt-KmsKey
+        - PolicyName: GlueJobEncryptDecryptPolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -41,7 +40,6 @@ Resources:
   GlueJobRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: GlueJobRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -66,7 +64,6 @@ Resources:
                 Resource:
                   - !Ref kmsKeyArnForCsv2Parquet
                   - !Ref kmsKeyArnForETL
-
 
   GlueSecurityConfigurationForCsv2Parquet:
     Type: 'AWS::Glue::SecurityConfiguration'
