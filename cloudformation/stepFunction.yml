@@ -9,9 +9,6 @@ Parameters:
   GlueJobETLArn:
     Type: String
     Description: ARN of the Gluejob ETL
-  scriptsBucket:
-    Type: String
-    Description: S3 bucket name where scripts will be uploaded
 
 Resources:
 

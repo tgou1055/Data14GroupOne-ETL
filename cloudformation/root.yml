@@ -77,7 +77,6 @@ Resources:
         LambdaRaw2StagingArn: !GetAtt LambdaStack.Outputs.LambdaRaw2StagingArn
         GlueJobCsv2ParquetArn: !GetAtt GlueJobStack.Outputs.GlueJobCsv2ParquetArn
         GlueJobETLArn: !GetAtt GlueJobStack.Outputs.GlueJobETLArn
-        scriptsBucket: !Ref scriptsBucket
 
 
   # https://repost.aws/knowledge-center/cloudformation-nested-stacks-values
