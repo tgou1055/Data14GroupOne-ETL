@@ -37,6 +37,7 @@ Resources:
         rawBucket: !Ref rawBucket
         stagingBucket: !Ref stagingBucket
         lambdaRaw2stagingVersion: !Ref lambdaRaw2stagingVersion
+        kmsKeyForDEArn: !Ref kmsKeyForDEArn
 
   GlueCatalogStagingStack:
     Type: 'AWS::CloudFormation::Stack'
