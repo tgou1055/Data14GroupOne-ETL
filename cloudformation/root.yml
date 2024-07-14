@@ -68,6 +68,14 @@ Resources:
     Properties:
       TopicName: GlueJobFailureNotifications
 
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: data14group1@gmail.com
+      Protocol: email
+      TopicArn:
+        Ref: SNSTopic
+
   # https://repost.aws/knowledge-center/cloudformation-nested-stacks-values
   StepFunctionStack:
     Type: 'AWS::CloudFormation::Stack'
