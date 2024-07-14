@@ -27,7 +27,7 @@ jobs:
           aws-region: ap-southeast-2
 
       - name: Run upload script
-        run: sh scripts/shell/upload_to_s3.sh ${{ github.event.inputs.scriptsBucket }}
+        run: sh scripts/shell/upload_to_s3.sh data14group1-scripts
 
 
       - name: Deploy CloudFormation Stack
