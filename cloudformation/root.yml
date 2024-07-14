@@ -12,10 +12,11 @@ Parameters:
     Type: String
   lambdaRaw2stagingVersion:
     Type: String
-  kmsKeyArnForCsv2Parquet:
+  kmsKeyForDEArn:
     Type: String
-  kmsKeyArnForETL:
+  kmsKeyForMLArn:
     Type: String
+
 
 Resources:
   GlueJobStack:
@@ -24,8 +25,8 @@ Resources:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueJob.yml"
       Parameters:
         scriptsBucket: !Ref scriptsBucket
-        kmsKeyArnForCsv2Parquet: !Ref kmsKeyArnForCsv2Parquet
-        kmsKeyArnForETL: !Ref kmsKeyArnForETL
+        kmsKeyForDEArn: !Ref kmsKeyForDEArn
+        kmsKeyForMLArn: !Ref kmsKeyForMLArn
 
   LambdaStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -36,6 +37,7 @@ Resources:
         rawBucket: !Ref rawBucket
         stagingBucket: !Ref stagingBucket
         lambdaRaw2stagingVersion: !Ref lambdaRaw2stagingVersion
+        kmsKeyForDEArn: !Ref kmsKeyForDEArn
 
   GlueCatalogStagingStack:
     Type: 'AWS::CloudFormation::Stack'
@@ -58,11 +60,39 @@ Resources:
       Parameters:
         mlBucket: !Ref mlBucket
 
-#  StepFunctionStack:
-#    Type: 'AWS::CloudFormation::Stack'
+
+
+  # SNS Topic
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: GlueJobFailureNotifications
+
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: data14group1@gmail.com
+      Protocol: email
+      TopicArn:
+        Ref: SNSTopic
+
+  # https://repost.aws/knowledge-center/cloudformation-nested-stacks-values
+  StepFunctionStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
+      Parameters:
+        LambdaRaw2StagingArn: !GetAtt LambdaStack.Outputs.LambdaRaw2StagingArn
+        GlueJobCsv2ParquetName: !GetAtt GlueJobStack.Outputs.GlueJobCsv2ParquetName
+        GlueJobETLName: !GetAtt GlueJobStack.Outputs.GlueJobETLName
+
+
+  # https://repost.aws/knowledge-center/cloudformation-nested-stacks-values
+#  EventBridgeStack:
+#    Type: AWS::CloudFormation::Stack
 #    Properties:
-#      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
+#      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml"
 #      Parameters:
-#        scriptsBucket: !Ref scriptsBucket
+#        StateMachineArn: !GetAtt StepFunctionStack.Outputs.StateMachineArn
 
 

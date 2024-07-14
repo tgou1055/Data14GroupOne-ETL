@@ -8,6 +8,8 @@ Parameters:
     Type: String
   lambdaRaw2stagingVersion:
     Type: String
+  kmsKeyForDEArn:
+    Type: String
 
 Resources:
   LambdaExecutionRole:
@@ -24,6 +26,17 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Policies:
+        - PolicyName: LambdaRaw2StagingEncryptPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:Encrypt
+                  - kms:GenerateDataKey
+                Resource: !Ref kmsKeyForDEArn
 
   LambdaRaw2Staging:
     Type: 'AWS::Lambda::Function'
@@ -43,3 +56,8 @@ Resources:
           DESTINATION_BUCKET: !Ref stagingBucket
       EphemeralStorage:
         Size: 1024
+
+Outputs:
+  LambdaRaw2StagingArn:
+    Description: lambda arn
+    Value: !GetAtt LambdaRaw2Staging.Arn

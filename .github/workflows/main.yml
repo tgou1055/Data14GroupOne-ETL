@@ -27,14 +27,9 @@ on:
         description: "S3 bucket name where ml data is stored"
         required: true
         default: data14group1-ml
-      kmsKeyArnForCsv2Parquet:
-        description: "KMS Key ARN for encrypting data in GlueJobCsv2Parquet"
-        required: true
-        default: "arn:aws:kms:ap-southeast-2:339713004220:key/fe40ec14-2c15-437a-b2ca-76c12be24c6e"
-      kmsKeyArnForETL:
-        description: "KMS Key ARN for encrypting data in GlueJobETL"
-        required: true
-        default: "arn:aws:kms:ap-southeast-2:339713004220:key/a922aa60-b15b-44eb-bd2a-a47b47f11293"
+  push:
+    branches:
+      - main
 
 jobs:
   cfn-deployment:
@@ -42,8 +37,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 2 # Fetch the last two commits, used to comparing diff
+#        with:
+#          fetch-depth: 2 # Fetch the last two commits, used to comparing diff
 
       - name: Configure AWS credentials
         id: creds
@@ -70,7 +65,7 @@ jobs:
             transformedBucket=${{ github.event.inputs.transformedBucket }},
             mlBucket=${{ github.event.inputs.mlBucket }},
             lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }},
-            kmsKeyArnForCsv2Parquet=${{ github.event.inputs.kmsKeyArnForCsv2Parquet }},
-            kmsKeyArnForETL=${{ github.event.inputs.kmsKeyArnForETL }}
+            kmsKeyForDEArn=${{ secrets.KMS_KEY_DE_ARN }},
+            kmsKeyForMLArn=${{ secrets.KMS_KEY_ML_ARN }}
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"

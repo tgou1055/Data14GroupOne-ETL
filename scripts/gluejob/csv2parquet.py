@@ -9,8 +9,6 @@ from pyspark.sql.types import *
 import time
 import os
 
-
-
 # prod
 spark = SparkSession.builder.appName("data14group1-csv2parquet").getOrCreate()
 source_bucket = "s3://data14group1-staging"

@@ -3,7 +3,13 @@
 
 # In[ ]:
 
-
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from awsglue.dynamicframe import DynamicFrame
 from pyspark.sql import SparkSession
 import time
 import os
@@ -11,27 +17,28 @@ import os
 
 
 # prod
-spark = SparkSession.builder.appName("data14group1-ETL").getOrCreate()
-source_bucket = "s3://data14group1-staging"
-dest_bucket = "s3://data14group1-transformed"
-ml_bucket = "s3://data14group1-ml"
+# Initialize Glue job
+args = getResolvedOptions(sys.argv, ["data14group1-ETL"])
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["data14group1-ETL"], args)
+
+source_database = "transformed"
+dest_bucket = "s3://data14group1-ml"
 
 
 
 # In[ ]:
 
-
-executor_memory = spark.conf.get("spark.executor.memory")
-print(f"Executor Memory: {executor_memory}")
-driver_memory = spark.conf.get("spark.driver.memory")
-print(f"Driver Memory: {driver_memory}")
-
 # define functions
-def createTempView(dfName, bucket=dest_bucket, prefix=None):
-    df = spark.read.parquet(os.path.join(*[p for p in [bucket, prefix, dfName] if p]))
-    df.createOrReplaceTempView(dfName)
+def createTempView(database, table_name):
+    dynamic_frame = glueContext.create_dynamic_frame.from_catalog(database=database, table_name=table_name)
+    df = dynamic_frame.toDF()
+    df.createOrReplaceTempView(table_name)
 
-def saveAsParquet(df, dfName, bucket=dest_bucket, prefix=None):
+def saveAsParquet(df, dfName, bucket=dest_bucket, prefix="data"):
     path = os.path.join(*[p for p in [bucket, prefix, dfName] if p])
     df.write.mode('overwrite').parquet(path)
     print(f"{dfName} #. of partitions: {df.rdd.getNumPartitions()}")
@@ -54,10 +61,10 @@ class Timer:
 # In[ ]:
 
 
-createTempView("orders", prefix="intermediate")
-createTempView("order_products__prior", prefix="intermediate")
-createTempView("order_products__train", prefix="intermediate")
-createTempView("products_denorm", prefix="intermediate")
+createTempView(source_database, "orders")
+createTempView(source_database, "order_products__prior")
+createTempView(source_database, "order_products__train")
+createTempView(source_database, "products_denorm")
 
 
 # In[ ]:
@@ -239,7 +246,7 @@ USING (user_id, product_id);
 columns = trainval.columns
 trainval = trainval.select(*[columns[-1], *columns[:-1]]) # put last column (reordered) as first
 with Timer("trainval"):
-    saveAsParquet(trainval, "trainval", bucket=ml_bucket, prefix="data")
+    saveAsParquet(trainval, "trainval")
 
 
 # In[ ]:
@@ -263,7 +270,7 @@ JOIN (
 ) USING (product_id)
 """)
 with Timer("test"):
-    saveAsParquet(test, "test", bucket=ml_bucket, prefix="data")
+    saveAsParquet(test, "test")
 
 
 # In[ ]:

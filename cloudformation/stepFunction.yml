@@ -1,14 +1,21 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Parameters:
-  scriptsBucket:
+  LambdaRaw2StagingArn:
     Type: String
-    Description: S3 bucket name where scripts will be uploaded
-    
+    Description: ARN of the Lambda function
+  GlueJobCsv2ParquetName:
+    Type: String
+    Description: Name of the Gluejob csv2parquet
+  GlueJobETLName:
+    Type: String
+    Description: Name of the Gluejob ETL
+
 Resources:
-  StepFunctionRole:
-    Type: 'AWS::IAM::Role'
+  # https://docs.aws.amazon.com/step-functions/latest/dg/glue-iam.html
+  StepFunctionsExecutionRole:
+    Type: AWS::IAM::Role
     Properties:
-      RoleName: StepFunctionRole
+      RoleName: StepFunctionsExecutionRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -16,26 +23,104 @@ Resources:
             Principal:
               Service: states.amazonaws.com
             Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSStepFunctionsFullAccess
-        - arn:aws:iam::aws:policy/AWSLambdaFullAccess
-        - arn:aws:iam::aws:policy/AWSGlueServiceRole
+      Policies:
+        - PolicyName: StepFunctionsExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - glue:StartJobRun
+                  - glue:GetJobRun
+                  - glue:GetJobRuns
+                  - glue:BatchStopJobRun
+                  - sns:Publish
+                Resource: '*'
 
-  StateMachine:
-    Type: 'AWS::StepFunctions::StateMachine'
-    Properties:
-      StateMachineName: DataLakePipeline
-      RoleArn: !GetAtt StepFunctionRole.Arn
-      DefinitionS3Location:
-        Bucket: !Ref scriptsBucket
-        Key: statemachines/dataLakePipeline.json
 
-  EventBridgeRule:
-    Type: 'AWS::Events::Rule'
+  # https://docs.aws.amazon.com/step-functions/latest/dg/connect-lambda.html
+  # https://docs.aws.amazon.com/step-functions/latest/dg/connect-glue.html
+  PipelineStateMachine:
+    Type: AWS::StepFunctions::StateMachine
     Properties:
-      Name: DailyTrigger
-      ScheduleExpression: 'rate(1 day)'
-      State: 'ENABLED'
-      Targets:
-        - Arn: !GetAtt StateMachine.Arn
-          Id: StateMachineTarget
+      StateMachineName: PipelineStateMachine
+      RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
+      DefinitionString: !Sub |
+        {
+          "Comment": "datalake pipeline for data14 group1 project",
+          "StartAt": "RunLambda",
+          "States": {
+            "RunLambda": {
+              "Type": "Task",
+              "Resource": "${LambdaRaw2StagingArn}",
+              "Next": "CheckLambdaResult",
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "NotifyFailure"
+                }
+              ]
+            },
+            "CheckLambdaResult": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.raw2staging.statusCode",
+                  "NumericEquals": 200,
+                  "Next": "RunGlueJobCsv2Parquet"
+                }
+              ],
+              "Default": "NotifyFailure"
+            },
+            "RunGlueJobCsv2Parquet": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "${GlueJobCsv2ParquetName}"
+              },
+              "Next": "RunGlueJobETL",
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "NotifyFailure"
+                }
+              ]
+            },
+            "RunGlueJobETL": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "${GlueJobETLName}"
+              },
+              "Next": "Success",
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "NotifyFailure"
+                }
+              ]
+            },
+            "Success": {
+              "Type": "Succeed"
+            },
+            "NotifyFailure": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:GlueJobFailureNotifications",
+                "Message": {
+                  "Error": "An error occurred in the Step Function",
+                  "Details.$": "$"
+                },
+                "Subject": "Data14 Group1 Data Pipeline Error Notification"
+              },
+              "End": true
+            }
+          }
+        }
+
+Outputs:
+  StateMachineArn:
+    Description: "Step Function ARN"
+    Value: !GetAtt PipelineStateMachine.Arn

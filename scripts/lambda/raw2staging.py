@@ -43,7 +43,7 @@ def lambda_handler(event, context):
             s3.meta.client.copy(copy_source, destination_bucket, dest_key)
         else:
             logging.warning(f"raw2staging: File {key} does not end with .csv.gz or .csv and will not be processed.")
-    return {
+    return {"raw2staging": {
         'statusCode': 200,
         'body': 'raw2staging: ingestion complete.'
-    }
+    }}

@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  StateMachineArn:
+    Type: String
+    Description: ARN of the Step Function
+
+Resources:
+  # IAM Role for EventBridge to trigger Step Functions
+  EventBridgeInvokeStepFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: EventBridgeInvokeStepFunctionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowEventBridgeToInvokeStepFunction
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Ref StateMachineArn
+
+  EventBridgeRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: DailyTrigger
+      ScheduleExpression: rate(1 day)
+      State: ENABLED
+      Targets:
+        - Arn: !Ref StateMachineArn
+          Id: "StepFunctionTarget"
+          RoleArn: !GetAtt EventBridgeInvokeStepFunctionRole.Arn
