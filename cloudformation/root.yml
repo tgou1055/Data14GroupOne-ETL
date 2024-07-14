@@ -75,8 +75,8 @@ Resources:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/stepFunction.yml"
       Parameters:
         LambdaRaw2StagingArn: !GetAtt LambdaStack.Outputs.LambdaRaw2StagingArn
-        GlueJobCsv2ParquetArn: !GetAtt GlueJobStack.Outputs.GlueJobCsv2ParquetArn
-        GlueJobETLArn: !GetAtt GlueJobStack.Outputs.GlueJobETLArn
+        GlueJobCsv2ParquetName: !GetAtt GlueJobStack.Outputs.GlueJobCsv2ParquetName
+        GlueJobETLName: !GetAtt GlueJobStack.Outputs.GlueJobETLName
 
 
   # https://repost.aws/knowledge-center/cloudformation-nested-stacks-values

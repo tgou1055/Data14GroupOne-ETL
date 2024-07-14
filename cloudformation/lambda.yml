@@ -33,6 +33,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  - kms:Decrypt
                   - kms:Encrypt
                   - kms:GenerateDataKey
                 Resource: !Ref kmsKeyForDEArn

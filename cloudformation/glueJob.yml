@@ -63,6 +63,7 @@ Resources:
                   - !Ref kmsKeyForDEArn
               - Effect: Allow
                 Action:
+                  - kms:Decrypt
                   - kms:Encrypt
                   - kms:GenerateDataKey
                 Resource:
@@ -119,9 +120,9 @@ Resources:
       SecurityConfiguration: !Ref GlueSecurityConfigurationForETL
 
 Outputs:
-  GlueJobCsv2ParquetArn:
-    Description: csv2parquet arn
-    Value: !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${GlueJobCsv2Parquet}"
-  GlueJobETLArn:
-    Description: ETL arn
-    Value: !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${GlueJobETL}"
+  GlueJobCsv2Parquet:
+    Description: csv2parquet name
+    Value: !Ref GlueJobCsv2Parquet
+  GlueJobETLName:
+    Description: ETL name
+    Value: !Ref GlueJobETLName

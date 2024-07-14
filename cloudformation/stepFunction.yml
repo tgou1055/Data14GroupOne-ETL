@@ -3,12 +3,12 @@ Parameters:
   LambdaRaw2StagingArn:
     Type: String
     Description: ARN of the Lambda function
-  GlueJobCsv2ParquetArn:
+  GlueJobCsv2ParquetName:
     Type: String
-    Description: ARN of the Gluejob csv2parquet
-  GlueJobETLArn:
+    Description: Name of the Gluejob csv2parquet
+  GlueJobETLName:
     Type: String
-    Description: ARN of the Gluejob ETL
+    Description: Name of the Gluejob ETL
 
 Resources:
 
