@@ -36,13 +36,61 @@ Resources:
     Properties:
       StateMachineName: PipelineStateMachine
       RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
-      DefinitionS3Location:
-        Bucket: !Ref scriptsBucket
-        Key: statemachines/dataLakePipeline.json
-      DefinitionSubstitutions:
-        CopyFilesLambdaArn: !Ref CopyFilesLambdaArn
-        AWSRegion: !Ref "AWS::Region"
-        AWSAccountId: !Ref "AWS::AccountId"
+      DefinitionString: !Sub |
+        {
+          "Comment": "A Step Function to run Lambda with SNS notifications",
+          "StartAt": "RunLambda",
+          "States": {
+            "RunLambda": {
+              "Type": "Task",
+              "Resource": "${CopyFilesLambdaArn}",
+              "Next": "CheckLambdaResult",
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "NotifyFailure"
+                }
+              ]
+            },
+            "CheckLambdaResult": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.raw2staging.statusCode",
+                  "NumericEquals": 200,
+                  "Next": "Success"
+                }
+              ],
+              "Default": "NotifyFailure"
+            },
+            "Success": {
+              "Type": "Succeed"
+            },
+            "NotifyFailure": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:GlueJobFailureNotifications",
+                "Message": {
+                  "Fn::Join": [
+                    "\n",
+                    [
+                      "Step Function Error Notification:",
+                      "----------------------------",
+                      "Error: An error occurred in the Step Function",
+                      "Details:",
+                      "  Error: $.Error",
+                      "  Cause: $.Cause",
+                      "Source State: $$.State.Name"
+                    ]
+                  ]
+                },
+                "Subject": "Step Function Error Notification"
+              },
+              "End": true
+            }
+          }
+        }
 
 
 
