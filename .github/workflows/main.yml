@@ -27,6 +27,9 @@ on:
         description: "S3 bucket name where ml data is stored"
         required: true
         default: data14group1-ml
+  push:
+    branches:
+      - main
 
 jobs:
   cfn-deployment:
