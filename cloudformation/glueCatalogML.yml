@@ -1,0 +1,126 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  mlBucket:
+    Type: String
+
+Resources:
+  GlueDatabase:
+    Type: 'AWS::Glue::Database'
+    Properties:
+      CatalogId: !Ref "AWS::AccountId"
+      DatabaseInput:
+        Name: ml
+
+  TrainValTable:
+    Type: 'AWS::Glue::Table'
+    Properties:
+      DatabaseName: !Ref GlueDatabase
+      CatalogId: !Ref "AWS::AccountId"
+      TableInput:
+        Name: trainval
+        StorageDescriptor:
+          Columns:
+            - Name: "reordered"
+              Type: "int"
+            - Name: "user_orders"
+              Type: "int"
+            - Name: "user_sum_days_since_prior"
+              Type: "double"
+            - Name: "user_mean_days_since_prior"
+              Type: "double"
+            - Name: "user_total_products"
+              Type: "bigint"
+            - Name: "user_distinct_products"
+              Type: "bigint"
+            - Name: "user_reorder_ratio"
+              Type: "decimal(38,16)"
+            - Name: "up_orders"
+              Type: "bigint"
+            - Name: "up_first_order"
+              Type: "int"
+            - Name: "up_last_order"
+              Type: "int"
+            - Name: "up_average_cart_position"
+              Type: "double"
+            - Name: "prod_orders"
+              Type: "bigint"
+            - Name: "prod_reorder_probability"
+              Type: "decimal(38,16)"
+            - Name: "prod_reorder_times"
+              Type: "decimal(38,15)"
+            - Name: "prod_reorder_ratio"
+              Type: "decimal(38,16)"
+            - Name: "user_average_basket"
+              Type: "decimal(34,12)"
+            - Name: "up_order_rate"
+              Type: "decimal(34,12)"
+            - Name: "up_orders_since_last_order"
+              Type: "int"
+            - Name: "up_order_rate_since_first_order"
+              Type: "decimal(34,12)"
+          Location: !Sub "s3://${mlBucket}/data/trainval/"
+          InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+          SerdeInfo:
+            SerializationLibrary: "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+
+  TestTable:
+    Type: 'AWS::Glue::Table'
+    Properties:
+      DatabaseName: !Ref GlueDatabase
+      CatalogId: !Ref "AWS::AccountId"
+      TableInput:
+        Name: test
+        StorageDescriptor:
+          Columns:
+            - Name: "product_id"
+              Type: "int"
+            - Name: "user_id"
+              Type: "int"
+            - Name: "user_orders"
+              Type: "int"
+            - Name: "user_sum_days_since_prior"
+              Type: "double"
+            - Name: "user_mean_days_since_prior"
+              Type: "double"
+            - Name: "user_total_products"
+              Type: "bigint"
+            - Name: "user_distinct_products"
+              Type: "bigint"
+            - Name: "user_reorder_ratio"
+              Type: "decimal(38,16)"
+            - Name: "up_orders"
+              Type: "bigint"
+            - Name: "up_first_order"
+              Type: "int"
+            - Name: "up_last_order"
+              Type: "int"
+            - Name: "up_average_cart_position"
+              Type: "double"
+            - Name: "prod_orders"
+              Type: "bigint"
+            - Name: "prod_reorder_probability"
+              Type: "decimal(38,16)"
+            - Name: "prod_reorder_times"
+              Type: "decimal(38,15)"
+            - Name: "prod_reorder_ratio"
+              Type: "decimal(38,16)"
+            - Name: "user_average_basket"
+              Type: "decimal(34,12)"
+            - Name: "up_order_rate"
+              Type: "decimal(34,12)"
+            - Name: "up_orders_since_last_order"
+              Type: "int"
+            - Name: "up_order_rate_since_first_order"
+              Type: "decimal(34,12)"
+            - Name: "product_name"
+              Type: "string"
+            - Name: "aisle"
+              Type: "string"
+            - Name: "department"
+              Type: "string"
+          Location: !Sub "s3://${mlBucket}/data/test/"
+          InputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat"
+          OutputFormat: "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat"
+          SerdeInfo:
+            SerializationLibrary: "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"

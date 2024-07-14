@@ -3,12 +3,17 @@ Parameters:
   scriptsBucket:
     Type: String
     Description: S3 bucket name where scripts will be uploaded
+  kmsKeyArnForCsv2Parquet:
+    Type: String
+    Description: KMS Key ARN for encrypting data in GlueJobCsv2Parquet
+  kmsKeyArnForETL:
+    Type: String
+    Description: KMS Key ARN for encrypting data in GlueJobETL
 
 Resources:
-  GlueJobRole:
+  GlueJobRoleForDataEngineering:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: GlueJobRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -19,21 +24,82 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Policies:
+        - PolicyName: GlueJobEncryptDecryptPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: "VisualEditor0"
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:Encrypt
+                  - kms:GenerateDataKey
+                Resource: !Ref kmsKeyArnForCsv2Parquet
+
+  GlueJobRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Policies:
+        - PolicyName: KMSforETL
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: "VisualEditor0"
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:Encrypt
+                  - kms:GenerateDataKey
+                Resource:
+                  - !Ref kmsKeyArnForCsv2Parquet
+                  - !Ref kmsKeyArnForETL
+
+  GlueSecurityConfigurationForCsv2Parquet:
+    Type: 'AWS::Glue::SecurityConfiguration'
+    Properties:
+      Name: GlueSecurityConfigurationForCsv2Parquet
+      EncryptionConfiguration:
+        S3Encryptions:
+          - S3EncryptionMode: SSE-KMS
+            KmsKeyArn: !Ref kmsKeyArnForCsv2Parquet
+
+  GlueSecurityConfigurationForETL:
+    Type: 'AWS::Glue::SecurityConfiguration'
+    Properties:
+      Name: GlueSecurityConfigurationForETL
+      EncryptionConfiguration:
+        S3Encryptions:
+          - S3EncryptionMode: SSE-KMS
+            KmsKeyArn: !Ref kmsKeyArnForETL
 
   GlueJobCsv2Parquet:
     Type: 'AWS::Glue::Job'
     Properties:
       Name: GlueJobCsv2Parquet
-      Role: !GetAtt GlueJobRole.Arn
+      Role: !GetAtt GlueJobRoleForDataEngineering.Arn
       Command:
         Name: glueetl
         ScriptLocation: !Sub s3://${scriptsBucket}/gluejob/csv2parquet.py
         PythonVersion: '3'
       DefaultArguments:
         '--job-bookmark-option': 'job-bookmark-enable'
+        '--encryption-type': 'SSE-KMS'
+        '--kms-key-arn': !Ref kmsKeyArnForCsv2Parquet
       GlueVersion: '4.0'
       MaxCapacity: 2.0
       Timeout: 5
+      SecurityConfiguration: !Ref GlueSecurityConfigurationForCsv2Parquet
 
   GlueJobETL:
     Type: 'AWS::Glue::Job'
@@ -46,6 +112,9 @@ Resources:
         PythonVersion: '3'
       DefaultArguments:
         '--job-bookmark-option': 'job-bookmark-enable'
+        '--encryption-type': 'SSE-KMS'
+        '--kms-key-arn': !Ref kmsKeyArnForETL
       GlueVersion: '4.0'
       MaxCapacity: 2.0
       Timeout: 10
+      SecurityConfiguration: !Ref GlueSecurityConfigurationForETL
