@@ -63,7 +63,7 @@ Resources:
   SNSTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: GlueJobFailureNotifications
+      TopicName: StepFunctionNotifications
 
   EmailSubscription:
     Type: AWS::SNS::Subscription
