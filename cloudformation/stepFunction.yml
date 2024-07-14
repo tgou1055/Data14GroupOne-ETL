@@ -72,20 +72,10 @@ Resources:
               "Parameters": {
                 "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:GlueJobFailureNotifications",
                 "Message": {
-                  "Fn::Join": [
-                    "\n",
-                    [
-                      "Step Function Error Notification:",
-                      "----------------------------",
-                      "Error: An error occurred in the Step Function",
-                      "Details:",
-                      "  Error: $.Error",
-                      "  Cause: $.Cause",
-                      "Source State: $$.State.Name"
-                    ]
-                  ]
+                  "Error": "An error occurred in the Step Function",
+                  "Details.$": "$"
                 },
-                "Subject": "Step Function Error Notification"
+                "Subject": "Data14 Group1 Data Pipeline Error Notification"
               },
               "End": true
             }
