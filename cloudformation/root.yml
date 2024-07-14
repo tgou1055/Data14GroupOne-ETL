@@ -84,9 +84,9 @@ Resources:
         GlueJobETLName: !GetAtt GlueJobStack.Outputs.GlueJobETLName
 
   # https://repost.aws/knowledge-center/cloudformation-nested-stacks-values
-#  EventBridgeStack:
-#    Type: AWS::CloudFormation::Stack
-#    Properties:
-#      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml"
-#      Parameters:
-#        StateMachineArn: !GetAtt StepFunctionStack.Outputs.StateMachineArn
+  EventBridgeStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/eventBridge.yml"
+      Parameters:
+        StateMachineArn: !GetAtt StepFunctionStack.Outputs.StateMachineArn
