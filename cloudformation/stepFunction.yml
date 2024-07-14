@@ -53,7 +53,7 @@ Resources:
               "Parameters": {
                 "JobName": "GlueJobETL"
               },
-              "Next": "Success",
+              "Next": "Success"
             },
             "Success": {
               "Type": "Succeed"
