@@ -43,122 +43,98 @@ Resources:
       DefinitionString: !Sub |
         {
           "Comment": "datalake pipeline for data14 group1 project",
-          "StartAt": "RunGlueJobETL",
+          "StartAt": "RunLambda",
           "States": {
+            "RunLambda": {
+              "Type": "Task",
+              "Resource": "${LambdaRaw2StagingArn}",
+              "Next": "CheckLambdaResult",
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "NotifyFailure"
+                }
+              ]
+            },
+            "CheckLambdaResult": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.raw2staging.statusCode",
+                  "NumericEquals": 200,
+                  "Next": "RunGlueJobCsv2Parquet"
+                }
+              ],
+              "Default": "NotifyFailure"
+            },
+            "RunGlueJobCsv2Parquet": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "${GlueJobCsv2ParquetName}"
+              },
+              "Next": "CheckGlueJobCsv2ParquetResult",
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "NotifyFailure"
+                }
+              ]
+            },
+            "CheckGlueJobCsv2ParquetResult": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.GlueJobCsv2Parquet.Status",
+                  "StringEquals": "SUCCEEDED",
+                  "Next": "RunGlueJobETL"
+                }
+              ],
+              "Default": "NotifyFailure"
+            },
             "RunGlueJobETL": {
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
-                "JobName": "GlueJobETL"
+                "JobName": "${GlueJobETLName}"
               },
-              "Next": "Success"
+              "Next": "CheckGlueJobETLResult",
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "NotifyFailure"
+                }
+              ]
+            },
+            "CheckGlueJobETLResult": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.GlueJobETL.Status",
+                  "StringEquals": "SUCCEEDED",
+                  "Next": "Success"
+                }
+              ],
+              "Default": "NotifyFailure"
             },
             "Success": {
               "Type": "Succeed"
+            },
+            "NotifyFailure": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:GlueJobFailureNotifications",
+                "Message": {
+                  "Error": "An error occurred in the Step Function",
+                  "Details.$": "$"
+                },
+                "Subject": "Data14 Group1 Data Pipeline Error Notification"
+              },
+              "End": true
             }
           }
         }
-        
-        
-        
-
-#        {
-#          "Comment": "datalake pipeline for data14 group1 project",
-#          "StartAt": "RunLambda",
-#          "States": {
-#            "RunLambda": {
-#              "Type": "Task",
-#              "Resource": "${LambdaRaw2StagingArn}",
-#              "Next": "CheckLambdaResult",
-#              "Catch": [
-#                {
-#                  "ErrorEquals": ["States.ALL"],
-#                  "Next": "NotifyFailure"
-#                }
-#              ]
-#            },
-#            "CheckLambdaResult": {
-#              "Type": "Choice",
-#              "Choices": [
-#                {
-#                  "Variable": "$.raw2staging.statusCode",
-#                  "NumericEquals": 200,
-#                  "Next": "RunGlueJobCsv2Parquet"
-#                }
-#              ],
-#              "Default": "NotifyFailure"
-#            },
-#            "RunGlueJobCsv2Parquet": {
-#              "Type": "Task",
-#              "Resource": "${GlueJobCsv2ParquetArn}",
-#              "Parameters": {
-#                "JobName": "GlueJobCsv2Parquet"
-#              },
-#              "Next": "CheckGlueJobCsv2ParquetResult",
-#              "Catch": [
-#                {
-#                  "ErrorEquals": ["States.ALL"],
-#                  "Next": "NotifyFailure"
-#                }
-#              ]
-#            },
-#            "CheckGlueJobCsv2ParquetResult": {
-#              "Type": "Choice",
-#              "Choices": [
-#                {
-#                  "Variable": "$.GlueJobCsv2Parquet.Status",
-#                  "StringEquals": "SUCCEEDED",
-#                  "Next": "RunGlueJobETL"
-#                }
-#              ],
-#              "Default": "NotifyFailure"
-#            },
-#            "RunGlueJobETL": {
-#              "Type": "Task",
-#              "Resource": "${GlueJobETLArn}",
-#              "Parameters": {
-#                "JobName": "GlueJobETL"
-#              },
-#              "Next": "CheckGlueJobETLResult",
-#              "Catch": [
-#                {
-#                  "ErrorEquals": ["States.ALL"],
-#                  "Next": "NotifyFailure"
-#                }
-#              ]
-#            },
-#            "CheckGlueJobETLResult": {
-#              "Type": "Choice",
-#              "Choices": [
-#                {
-#                  "Variable": "$.GlueJobETL.Status",
-#                  "StringEquals": "SUCCEEDED",
-#                  "Next": "Success"
-#                }
-#              ],
-#              "Default": "NotifyFailure"
-#            },
-#            "Success": {
-#              "Type": "Succeed"
-#            },
-#            "NotifyFailure": {
-#              "Type": "Task",
-#              "Resource": "arn:aws:states:::sns:publish",
-#              "Parameters": {
-#                "TopicArn": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:GlueJobFailureNotifications",
-#                "Message": {
-#                  "Error": "An error occurred in the Step Function",
-#                  "Details.$": "$"
-#                },
-#                "Subject": "Data14 Group1 Data Pipeline Error Notification"
-#              },
-#              "End": true
-#            }
-#          }
-#        }
-
-
-
 
 Outputs:
   StateMachineArn:
