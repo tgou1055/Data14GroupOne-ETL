@@ -49,7 +49,7 @@ Resources:
           "States": {
             "RunGlueJobETL": {
               "Type": "Task",
-              "Resource": "${GlueJobETLArn}",
+              "Resource": "arn:aws:glue:ap-southeast-2:339713004220:job/GlueJobETL",
               "Parameters": {
                 "JobName": "GlueJobETL"
               },
