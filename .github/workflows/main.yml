@@ -70,11 +70,7 @@ jobs:
             transformedBucket=${{ github.event.inputs.transformedBucket }},
             mlBucket=${{ github.event.inputs.mlBucket }},
             lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }},
-<<<<<<< HEAD
-            rootEmail=${{  secrets.ROOT_EMAIL  }}
-=======
-            kmsKeyArnForCsv2Parquet=${{ github.event.inputs.kmsKeyArnForCsv2Parquet }},
-            kmsKeyArnForETL=${{ github.event.inputs.kmsKeyArnForETL }}
->>>>>>> origin/main
+            kmsKeyForDEArn=${{ secrets.KMS_KEY_DE_ARN }},
+            kmsKeyForMLArn=${{ secrets.KMS_KEY_ML_ARN }}
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"

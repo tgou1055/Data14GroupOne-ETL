@@ -12,6 +12,10 @@ Parameters:
     Type: String
   lambdaRaw2stagingVersion:
     Type: String
+  kmsKeyForDEArn:
+    Type: String
+  kmsKeyForMLArn:
+    Type: String
 
 
 Resources:
@@ -21,8 +25,8 @@ Resources:
       TemplateURL: !Sub "https://s3.amazonaws.com/${scriptsBucket}/cloudformation/glueJob.yml"
       Parameters:
         scriptsBucket: !Ref scriptsBucket
-        kmsKeyArnForCsv2Parquet: !Ref kmsKeyArnForCsv2Parquet
-        kmsKeyArnForETL: !Ref kmsKeyArnForETL
+        kmsKeyForDEArn: !Ref kmsKeyForDEArn
+        kmsKeyForMLArn: !Ref kmsKeyForMLArn
 
   LambdaStack:
     Type: 'AWS::CloudFormation::Stack'
