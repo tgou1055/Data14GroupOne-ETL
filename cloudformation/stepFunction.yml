@@ -36,7 +36,8 @@ Resources:
                   - lambda:InvokeFunction
                   - sns:Publish
                 Resource: '*'
-
+  # https://docs.aws.amazon.com/step-functions/latest/dg/connect-lambda.html
+  # https://docs.aws.amazon.com/step-functions/latest/dg/connect-glue.html
   PipelineStateMachine:
     Type: AWS::StepFunctions::StateMachine
     Properties:
@@ -49,7 +50,7 @@ Resources:
           "States": {
             "RunGlueJobETL": {
               "Type": "Task",
-              "Resource": "arn:aws:glue:ap-southeast-2:339713004220:job/GlueJobETL",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": {
                 "JobName": "GlueJobETL"
               },
