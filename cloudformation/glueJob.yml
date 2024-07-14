@@ -64,8 +64,8 @@ Resources:
                   - kms:Encrypt
                   - kms:GenerateDataKey
                 Resource:
-                  - "arn:aws:kms:ap-southeast-2:339713004220:key/fe40ec14-2c15-437a-b2ca-76c12be24c6e"
-                  - "arn:aws:kms:ap-southeast-2:339713004220:key/a922aa60-b15b-44eb-bd2a-a47b47f11293"
+                  - !Ref kmsKeyArnForCsv2Parquet
+                  - !Ref kmsKeyArnForETL
 
 
   GlueSecurityConfigurationForCsv2Parquet:
