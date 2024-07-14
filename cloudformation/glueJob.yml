@@ -53,21 +53,20 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
       Policies:
-        - PolicyName: GlueJobEncryptDecrypt-KmsKey
+        - PolicyName: KMSforETL
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
-              - Sid: "AllowDecrypt"
+              - Sid: "VisualEditor0"
                 Effect: Allow
                 Action:
                   - kms:Decrypt
-                Resource: !Ref kmsKeyArnForETL
-              - Sid: "AllowEncryptAndGenerateDataKey"
-                Effect: Allow
-                Action:
                   - kms:Encrypt
                   - kms:GenerateDataKey
-                Resource: "arn:aws:kms:ap-southeast-2:339713004220:key/a922aa60-b15b-44eb-bd2a-a47b47f11293"
+                Resource:
+                  - "arn:aws:kms:ap-southeast-2:339713004220:key/fe40ec14-2c15-437a-b2ca-76c12be24c6e"
+                  - "arn:aws:kms:ap-southeast-2:339713004220:key/a922aa60-b15b-44eb-bd2a-a47b47f11293"
+
 
   GlueSecurityConfigurationForCsv2Parquet:
     Type: 'AWS::Glue::SecurityConfiguration'
