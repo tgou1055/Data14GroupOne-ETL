@@ -18,12 +18,12 @@ import os
 
 # prod
 # Initialize Glue job
-args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+args = getResolvedOptions(sys.argv, ["data14group1-ETL"])
 sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
-job.init(args['JOB_NAME'], args)
+job.init(args["data14group1-ETL"], args)
 
 source_database = "transformed"
 dest_bucket = "s3://data14group1-ml"
