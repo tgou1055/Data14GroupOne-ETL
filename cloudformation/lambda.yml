@@ -51,8 +51,8 @@ Resources:
       Timeout: 180
       Environment: 
         Variables: 
-          SOURCE_BUCKET: !Ref rawBucket
-          DESTINATION_BUCKET: !Ref stagingBucket
+          SOURCE_BUCKET: !Sub "s3://${rawBucket}"
+          DESTINATION_BUCKET: !Sub "s3://${stagingBucket}"
       EphemeralStorage:
         Size: 1024
 
