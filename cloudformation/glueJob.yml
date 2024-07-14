@@ -121,7 +121,7 @@ Resources:
 Outputs:
   GlueJobCsv2ParquetArn:
     Description: csv2parquet arn
-    Value: !GetAtt GlueJobCsv2Parquet.Arn
+    Value: !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${GlueJobCsv2Parquet}"
   GlueJobETLArn:
     Description: ETL arn
-    Value: !GetAtt GlueJobETL.Arn
+    Value: !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${GlueJobETL}"
