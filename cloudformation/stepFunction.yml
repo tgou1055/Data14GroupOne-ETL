@@ -1,8 +1,14 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Parameters:
-  CopyFilesLambdaArn:
+  LambdaRaw2StagingArn:
     Type: String
     Description: ARN of the Lambda function
+  GlueJobCsv2ParquetArn:
+    Type: String
+    Description: ARN of the Gluejob csv2parquet
+  GlueJobETLArn:
+    Type: String
+    Description: ARN of the Gluejob ETL
   scriptsBucket:
     Type: String
     Description: S3 bucket name where scripts will be uploaded
@@ -38,12 +44,12 @@ Resources:
       RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
       DefinitionString: !Sub |
         {
-          "Comment": "A Step Function to run Lambda with SNS notifications",
+          "Comment": "datalake pipeline for data14 group1 project",
           "StartAt": "RunLambda",
           "States": {
             "RunLambda": {
               "Type": "Task",
-              "Resource": "${CopyFilesLambdaArn}",
+              "Resource": "${LambdaRaw2StagingArn}",
               "Next": "CheckLambdaResult",
               "Catch": [
                 {
@@ -58,6 +64,56 @@ Resources:
                 {
                   "Variable": "$.raw2staging.statusCode",
                   "NumericEquals": 200,
+                  "Next": "RunGlueJobCsv2Parquet"
+                }
+              ],
+              "Default": "NotifyFailure"
+            },
+            "RunGlueJobCsv2Parquet": {
+              "Type": "Task",
+              "Resource": "${GlueJobCsv2ParquetArn}",
+              "Parameters": {
+                "JobName": "GlueJobCsv2Parquet"
+              },
+              "Next": "CheckGlueJobCsv2ParquetResult",
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "NotifyFailure"
+                }
+              ]
+            },
+            "CheckGlueJobCsv2ParquetResult": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.GlueJobCsv2Parquet.Status",
+                  "StringEquals": "SUCCEEDED",
+                  "Next": "RunGlueJobETL"
+                }
+              ],
+              "Default": "NotifyFailure"
+            },
+            "RunGlueJobETL": {
+              "Type": "Task",
+              "Resource": "${GlueJobETLArn}",
+              "Parameters": {
+                "JobName": "GlueJobETL"
+              },
+              "Next": "CheckGlueJobETLResult",
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "NotifyFailure"
+                }
+              ]
+            },
+            "CheckGlueJobETLResult": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.GlueJobETL.Status",
+                  "StringEquals": "SUCCEEDED",
                   "Next": "Success"
                 }
               ],
@@ -81,6 +137,7 @@ Resources:
             }
           }
         }
+
 
 
 

@@ -49,3 +49,11 @@ Resources:
       GlueVersion: '4.0'
       MaxCapacity: 2.0
       Timeout: 10
+
+Outputs:
+  GlueJobCsv2ParquetArn:
+    Description: csv2parquet arn
+    Value: !GetAtt GlueJobCsv2Parquet.Arn
+  GlueJobETLArn:
+    Description: ETL arn
+    Value: !GetAtt GlueJobETL.Arn

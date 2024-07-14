@@ -45,6 +45,6 @@ Resources:
         Size: 1024
 
 Outputs:
-  CopyFilesLambdaArn:
+  LambdaRaw2StagingArn:
     Description: lambda arn
     Value: !GetAtt LambdaRaw2Staging.Arn
