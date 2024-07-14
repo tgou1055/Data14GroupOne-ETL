@@ -34,7 +34,11 @@
         "TopicArn": "arn:aws:sns:${AWSRegion}:${AWSAccountId}:GlueJobFailureNotifications",
         "Message": {
           "Error": "An error occurred in the Step Function",
-          "Details.$": "$"
+          "Details": {
+            "Error.$": "$.Error",
+            "Cause.$": "$.Cause"
+          },
+          "SourceState.$": "$$.State.Name"
         },
         "Subject": "Step Function Error Notification"
       },
