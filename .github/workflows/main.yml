@@ -27,6 +27,14 @@ on:
         description: "S3 bucket name where ml data is stored"
         required: true
         default: data14group1-ml
+      kmsKeyArnForCsv2Parquet:
+        description: "KMS Key ARN for encrypting data in GlueJobCsv2Parquet"
+        required: true
+        default: "arn:aws:kms:ap-southeast-2:339713004220:key/fe40ec14-2c15-437a-b2ca-76c12be24c6e"
+      kmsKeyArnForETL:
+        description: "KMS Key ARN for encrypting data in GlueJobETL"
+        required: true
+        default: "arn:aws:kms:ap-southeast-2:339713004220:key/a922aa60-b15b-44eb-bd2a-a47b47f11293"
 
 jobs:
   cfn-deployment:
@@ -61,6 +69,8 @@ jobs:
             stagingBucket=${{ github.event.inputs.stagingBucket }},
             transformedBucket=${{ github.event.inputs.transformedBucket }},
             mlBucket=${{ github.event.inputs.mlBucket }},
-            lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }}
+            lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }},
+            kmsKeyArnForCsv2Parquet=${{ github.event.inputs.kmsKeyArnForCsv2Parquet }},
+            kmsKeyArnForETL=${{ github.event.inputs.kmsKeyArnForETL }}
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"
