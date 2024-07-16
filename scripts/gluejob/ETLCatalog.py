@@ -1,19 +1,26 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-from pyspark.sql import SparkSession
-from pyspark.sql.types import *
-import time
 import os
+import time
 
-# prod
-spark = SparkSession.builder.appName("data14group1-csv2parquet").getOrCreate()
-source_bucket = "s3://data14group1-transformed"
+from awsglue.transforms import *
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+
+sc = SparkContext.getOrCreate()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+
+source_database = "transformed"
 dest_bucket = "s3://data14group1-ml"
 
-def createTempView(dfName, bucket, prefix=None):
-    df = spark.read.parquet(os.path.join(*[p for p in [bucket, prefix, dfName] if p]))
-    df.createOrReplaceTempView(dfName)
+
+# define functions
+def createTempView(database, table_name):
+    dynamic_frame = glueContext.create_dynamic_frame.from_catalog(database=database, table_name=table_name)
+    df = dynamic_frame.toDF()
+    df.createOrReplaceTempView(table_name)
+
 
 def saveAsParquet(df, dfName, bucket=dest_bucket, prefix="data"):
     path = os.path.join(*[p for p in [bucket, prefix, dfName] if p])
@@ -36,10 +43,11 @@ class Timer:
         print(f"{self.name} execution time: {self.execution_time:.3f} seconds")
 
 
-createTempView("orders", source_bucket, prefix="intermediate")
-createTempView("order_products__prior", source_bucket, prefix="intermediate")
-createTempView("order_products__train", source_bucket, prefix="intermediate")
-createTempView("products_denorm", source_bucket, prefix="intermediate")
+# Q1 prep
+createTempView(source_database, "orders")
+createTempView(source_database, "order_products__prior")
+createTempView(source_database, "order_products__train")
+createTempView(source_database, "products_denorm")
 
 order_products_prior = spark.sql("""
 SELECT 
@@ -204,4 +212,4 @@ with Timer("test"):
 output.unpersist()
 
 # Commit job
-spark.stop()
+job.commit()
