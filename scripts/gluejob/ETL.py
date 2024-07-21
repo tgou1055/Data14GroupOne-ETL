@@ -8,8 +8,8 @@ import os
 
 # prod
 spark = SparkSession.builder.appName("data14group1-csv2parquet").getOrCreate()
-source_bucket = "s3://data14group1-transformed"
-dest_bucket = "s3://data14group1-ml"
+source_bucket = "s3://data14group1-tim-transformed" # change this to your local bucket name
+dest_bucket = "s3://data14group1-tim-ml" # change this to your local bucket name
 
 def createTempView(dfName, bucket, prefix=None):
     df = spark.read.parquet(os.path.join(*[p for p in [bucket, prefix, dfName] if p]))
