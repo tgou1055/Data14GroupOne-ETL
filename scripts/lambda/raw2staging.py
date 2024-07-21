@@ -4,7 +4,7 @@ import gzip
 import shutil
 import logging
 
-# test bucket versioning 
+# test bucket versioning 2
 
 s3 = boto3.resource('s3')
 s3_client = boto3.client('s3')
