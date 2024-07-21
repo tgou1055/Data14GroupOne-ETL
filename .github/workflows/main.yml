@@ -27,7 +27,7 @@ jobs:
           aws-region: ap-southeast-2
 
       - name: Run upload script
-        run: sh scripts/shell/upload_to_s3.sh data14group1-scripts
+        run: sh scripts/shell/upload_to_s3.sh data14group1-tim-scripts
 
       - name: Deploy CloudFormation Stack
         id: deploy-stack
@@ -36,13 +36,14 @@ jobs:
           name: deploy-stack
           template: cloudformation/root.yml
           parameter-overrides: |
-            scriptsBucket=data14group1-scripts,
-            rawBucket=data14group1-raw,
-            stagingBucket=data14group1-staging,
-            transformedBucket=data14group1-transformed,
-            mlBucket=data14group1-ml,
+            scriptsBucket=data14group1-tim-scripts,
+            rawBucket=data14group1-tim-raw,
+            stagingBucket=data14group1-tim-staging,
+            transformedBucket=data14group1-tim-transformed,
+            mlBucket=data14group1-tim-ml,
             lambdaRaw2stagingVersion=${{ env.LAMBDA_RAW2STAGING_VERSION }},
             kmsKeyForDEArn=${{ secrets.KMS_KEY_DE_ARN }},
-            kmsKeyForMLArn=${{ secrets.KMS_KEY_ML_ARN }}
+            kmsKeyForMLArn=${{ secrets.KMS_KEY_ML_ARN }},
+            rootEmail=tgoude628@gmail.com
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"

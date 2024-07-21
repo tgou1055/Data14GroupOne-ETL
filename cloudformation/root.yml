@@ -16,6 +16,8 @@ Parameters:
     Type: String
   kmsKeyForMLArn:
     Type: String
+  rootEmail:
+    Type: String
 
 
 Resources:
@@ -68,7 +70,7 @@ Resources:
   EmailSubscription:
     Type: AWS::SNS::Subscription
     Properties:
-      Endpoint: data14group1@gmail.com
+      Endpoint: !Ref rootEmail
       Protocol: email
       TopicArn:
         Ref: SNSTopic
